@@ -1,0 +1,11 @@
+# Tiedostot, joita ei saa kutsua selaimsesta.
+IndexIgnore .htaccess
+
+# Ei näytetä tiedostolistausta ja seurataan symbolisia linkkejä.
+Options -indexes +FollowSymLinks
+
+RewriteEngine On
+
+# Ohjataan terminaalille tulevat käskyt oikeaan paikkaan.
+RewriteRule ^([^\/]+)$ terminal/index.php?command=$1&params= [QSA,L]
+RewriteRule ^([^\/]+)/(.*)$ terminal/index.php?command=$1&params=$2 [QSA,L]
