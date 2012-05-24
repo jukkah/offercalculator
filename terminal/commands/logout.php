@@ -1,7 +1,7 @@
 <?php
 
 // Varmistetaan tarvittavien tiedostojen saanti.
-require_once 'command.php';
+require_once 'abstract-command.php';
 
 /**
  * Kirjaa käyttäjän ulos.
@@ -15,14 +15,21 @@ require_once 'command.php';
  *
  * @author jukkah
  */
-class Logout implements Command {
+class Logout extends AbstractCommand {
 
+    /**
+     * Luo ilmentymän komennosta sallituilla komennoilla.
+     */
+    public function __construct() {
+        parent::__construct(array("HEAD"));
+    }
+    
     /**
      * Suorittaa komennon.
      * 
      * @return void 
      */
-    public function execute() {
+    protected function execute_command() {
         
     }
 
