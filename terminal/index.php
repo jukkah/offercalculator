@@ -3,6 +3,7 @@
 // $_REQUEST["command"] sisältää komennon nimen.
 // $_REQUEST["params"] sisältää komennon parametrit, jota välitettiin URL:in
 // osana.
+
 // Varmistetaan tarvittavien tiedostojen saanti.
 require_once 'command-switcher.php';
 

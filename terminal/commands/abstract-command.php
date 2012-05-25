@@ -12,7 +12,7 @@ abstract class AbstractCommand implements Command {
 
     /**
      * Lista niistä HTTP:n metodeista, joilla komentoa saa kutsua. Mahdollisia
-     * arvoja ovat HEAD, GET, POST, PUT, DELETE ja PATCH.
+     * metodeja ovat esimerkiksi HEAD, GET, POST, PUT, DELETE ja PATCH.
      * 
      * @var array Lista sallituista HTTP:n metodeista.
      */
@@ -31,7 +31,7 @@ abstract class AbstractCommand implements Command {
      */
     final public function execute() {
         $method = $_SERVER["REQUEST_METHOD"];
-        
+
         if (in_array($method, $this->ACCEPTED_METHODS)) {
             // Jos metodi on sallittu, suoritetaan komento.
             $this->execute_command();
@@ -39,8 +39,7 @@ abstract class AbstractCommand implements Command {
             // Jos metodi on OPTIONS, kerrotaan, mitkä metodit ovat sallittuja.
             $this->execute_options();
         } else {
-            header("HTTP/1.1 405 Method Not Allowed");
-            exit;
+            $this->method_not_allowed();
         }
     }
 
@@ -48,6 +47,14 @@ abstract class AbstractCommand implements Command {
         $methods = implode(", ", $this->ACCEPTED_METHODS);
 
         header("Allow: $methods");
+    }
+
+    /**
+     * Tällä metodilla katkaistaan komennon suoritus HTTP:n 405 virheeseen.
+     */
+    protected function method_not_allowed() {
+        header("HTTP/1.1 405 Method Not Allowed");
+        exit;
     }
 
     /**

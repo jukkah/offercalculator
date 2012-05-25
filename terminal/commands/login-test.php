@@ -23,7 +23,7 @@ class LoginTest extends AbstractCommand {
     public function __construct() {
         parent::__construct(array("HEAD"));
     }
-    
+
     /**
      * Suorittaa komennon.
      * 
