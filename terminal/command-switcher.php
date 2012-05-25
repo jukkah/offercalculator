@@ -24,7 +24,7 @@ class CommandSwitcher {
 
         if (is_null($command)) {
             header("HTTP/1.1 404 Not Found");
-            exit;
+            return;
         }
 
         try {
@@ -33,7 +33,6 @@ class CommandSwitcher {
             //TODO: Laitetaan virhe lokiin.
 
             header("HTTP/1.1 500 Internal Server Error");
-            exit;
         }
     }
 

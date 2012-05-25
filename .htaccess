@@ -4,7 +4,13 @@ IndexIgnore .htaccess
 # Ei näytetä tiedostolistausta ja seurataan symbolisia linkkejä.
 Options -indexes +FollowSymLinks
 
+# Asetetaan oletusmerkistö
+AddDefaultCharset UTF-8
+
 RewriteEngine On
+
+#Nämä tiedostoja ja hakemistoja ei ohjata.
+RewriteRule ^test/ - [L,NC]
 
 # Ohjataan terminaalille tulevat käskyt oikeaan paikkaan.
 RewriteRule ^([^\/]+)$ terminal/index.php?command=$1&params= [QSA,L]

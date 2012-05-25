@@ -54,7 +54,6 @@ abstract class AbstractCommand implements Command {
      */
     protected function method_not_allowed() {
         header("HTTP/1.1 405 Method Not Allowed");
-        exit;
     }
 
     /**

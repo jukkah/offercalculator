@@ -10,7 +10,7 @@ require_once 'abstract-command.php';
  * HEAD /login-test
  * 
  * Vastaus:
- * HTTP/1.1 200 OK
+ * HTTP/1.1 204 No Content
  * Logged-in: ${true|false}</pre>
  * 
  * @author jukkah
