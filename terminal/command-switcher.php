@@ -20,7 +20,7 @@ class CommandSwitcher {
      * @return void
      */
     public function run_command() {
-        $command = $this->select_command();
+        $command = $this->get_command();
 
         if (is_null($command)) {
             header("HTTP/1.1 404 Not Found");
@@ -44,40 +44,17 @@ class CommandSwitcher {
      * @return null Mikäli komennon ilmentymää ei voitu syystä tai toisesta
      * luoda; sitä ei löytynyt.
      */
-    private function select_command() {
+    private function get_command() {
         $command = NULL;
 
         $file_name = $_REQUEST["command"][0];
+        $class_name = $this->get_command_class_name($file_name);
 
-        if ($file_name !== FALSE) {
-            $class_name = $this->get_command_class_name($file_name);
-
-            if ($file_name !== FALSE) {
-                $command = $this->create_command($file_name, $class_name);
-            }
+        if ($this->load_command_class($file_name)) {
+            $command = $this->create_command_instance($class_name);
         }
 
         return $command;
-    }
-
-    /**
-     * Lataa annetun nimisen komentotiedoston ja luo siitä ilmentymän.
-     * 
-     * @param string $file_name Komennon tiedoston nimi ilman tiedostopäätettä.
-     * @param string $class_name Komennon luokan nimi.
-     * @return Command Normaalitilanteessa paluuarvo on pyydetyn komennon
-     * ilmentymä.
-     * @return null Mikäli komennosta ei voitu syystä tai toisesta luoda
-     * ilmentymää; sitä ei löytynyt.
-     */
-    private function create_command($file_name, $class_name) {
-        $instance = NULL;
-
-        if ($this->load_command_class($file_name)) {
-            $instance = $this->create_command_instance($class_name);
-        }
-
-        return $instance;
     }
 
     /**
@@ -91,9 +68,9 @@ class CommandSwitcher {
         $result = FALSE;
 
         if (file_exists($file_name)) {
-            // .htaccess:issa varmistetaan, että $file_name ei nyt voi olla
-            // esimerkiksi commands/../index.php tai commands/hack-me/index.php.
-
+            // Koska $file_name ei voi sisältää /-merkkiä, tiedosto ladataan
+            // aina commands-hakemistosta.
+            
             require_once $file_name;
 
             $result = TRUE;
