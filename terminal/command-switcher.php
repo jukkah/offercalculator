@@ -39,19 +39,22 @@ class CommandSwitcher {
     /**
      * Valitsee suoritettavan komennon ja luo siitä ilmentymän.
      * 
-     * @return Command Normaalitilanteessa paluuarvo on $_REQUEST["command"]:ssa
-     * pyydetyn komennon ilmentymä.
+     * @return Command Normaalitilanteessa paluuarvo on
+     * $_REQUEST["command"][0]:ssa pyydetyn komennon ilmentymä.
      * @return null Mikäli komennon ilmentymää ei voitu syystä tai toisesta
      * luoda; sitä ei löytynyt.
      */
     private function select_command() {
         $command = NULL;
 
-        $file_name = $_REQUEST["command"];
-        $class_name = $this->get_command_class_name($file_name);
+        $file_name = $_REQUEST["command"][0];
 
         if ($file_name !== FALSE) {
-            $command = $this->create_command($file_name, $class_name);
+            $class_name = $this->get_command_class_name($file_name);
+
+            if ($file_name !== FALSE) {
+                $command = $this->create_command($file_name, $class_name);
+            }
         }
 
         return $command;

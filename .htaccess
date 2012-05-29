@@ -13,5 +13,4 @@ RewriteEngine On
 RewriteRule ^test/ - [L,NC]
 
 # Ohjataan terminaalille tulevat käskyt oikeaan paikkaan.
-RewriteRule ^([^\/]+)$ terminal/index.php?command=$1&params= [QSA,L]
-RewriteRule ^([^\/]+)/(.*)$ terminal/index.php?command=$1&params=$2 [QSA,L]
+RewriteRule ^(.+)$ terminal/index.php?command=$1 [QSA,L]
