@@ -1,7 +1,7 @@
 <?php
 
 // Varmistetaan tarvittavien tiedostojen saanti.
-require_once 'abstract-command.php';
+load_file("abstract-command.php", "commands");
 
 /**
  * Hoitaa käyttäjätilin luonnin (PUT), tietojen haun (GET), tietojen päivityksen

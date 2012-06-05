@@ -1,7 +1,7 @@
 <?php
 
 // Varmistetaan tarvittavien tiedostojen saanti.
-require_once 'abstract-command.php';
+load_file("abstract-command.php", "commands");
 
 /**
  * Kirjaa käyttäjän sisään.
@@ -25,7 +25,7 @@ class Login extends AbstractCommand {
      * Luo ilmentymän komennosta sallituilla komennoilla.
      */
     public function __construct() {
-        parent::__construct(array("HEAD", "GET"));
+        parent::__construct(array("HEAD"));
     }
 
     /**

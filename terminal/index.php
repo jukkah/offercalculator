@@ -1,14 +1,12 @@
 <?php
 
-// $_REQUEST["command"] sisältää komennon nimen.
+/**
+ * Terminaalin ajax-pyynnöt vastaanottava tiedosto.
+ */
 
 // Varmistetaan tarvittavien tiedostojen saanti.
-require_once 'command-switcher.php';
-
-// Pilkotaan command taulukoksi /-merkin kohdalta.
-if (isset($_REQUEST["command"])) {
-    $_REQUEST["command"] = explode("/", $_REQUEST["command"]);
-}
+require_once 'utils.php';
+load_file("command-switcher.php");
 
 // Ohjataan suoritus komennon valitsimelle.
 $switcher = new CommandSwitcher();

@@ -8,7 +8,7 @@
  * Komento <-> komento.php<br>
  * CommandName <-> command-name.php
  * 
- * Lisäksi niiden on oltava samassa kansiossa.
+ * Lisäksi niiden on oltava terminal/commadns-hakemiston alla.
  * 
  * @author jukkah
  */
@@ -17,7 +17,7 @@ interface Command {
     /**
      * Suorittaa komennon.
      * 
-     * Mikäli metodi heittää virheen, selaimelle lähetetään HTTP-virhe 500.
+     * Mikäli metodi heittää poikkeuksen, selaimelle lähetetään tilakoodi 500.
      * 
      * @return void
      */

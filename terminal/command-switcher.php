@@ -1,7 +1,7 @@
 <?php
 
 // Varmistetaan tarvittavien tiedostojen saanti.
-require_once 'commands/command.php';
+load_file("command.php", "commands");
 
 /**
  * Päättelee, mikä komento pitäisi suorittaa ja suorittaa sen hallitusti.
@@ -30,9 +30,11 @@ class CommandSwitcher {
         try {
             $command->execute();
         } catch (Exception $e) {
-            //TODO: Laitetaan virhe lokiin.
+            if (!($e instanceof BreakException)) {
+                //TODO: Laitetaan virhe lokiin.
 
-            header("HTTP/1.1 500 Internal Server Error");
+                header("HTTP/1.1 500 Internal Server Error");
+            }
         }
     }
 
@@ -47,11 +49,14 @@ class CommandSwitcher {
     private function get_command() {
         $command = NULL;
 
-        $file_name = $_REQUEST["command"][0];
-        $class_name = $this->get_command_class_name($file_name);
+        // Varmistetaan, että komentoa on todellakin pyydetty.
+        if (isset($_REQUEST["command"])) {
+            $file_name = $_REQUEST["command"][0];
+            $class_name = $this->get_command_class_name($file_name);
 
-        if ($this->load_command_class($file_name)) {
-            $command = $this->create_command_instance($class_name);
+            if ($this->load_command_class($file_name)) {
+                $command = $this->create_command_instance($class_name);
+            }
         }
 
         return $command;
@@ -64,19 +69,7 @@ class CommandSwitcher {
      * @return boolean Palautetaan tieto tiedoston lataamisen onnistumisesta. 
      */
     private function load_command_class($file_name) {
-        $file_name = "commands/$file_name.php";
-        $result = FALSE;
-
-        if (file_exists($file_name)) {
-            // Koska $file_name ei voi sisältää /-merkkiä, tiedosto ladataan
-            // aina commands-hakemistosta.
-            
-            require_once $file_name;
-
-            $result = TRUE;
-        }
-
-        return $result;
+        return load_file("$file_name.php", "commands");
     }
 
     /**

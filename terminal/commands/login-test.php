@@ -1,7 +1,7 @@
 <?php
 
 // Varmistetaan tarvittavien tiedostojen saanti.
-require_once 'abstract-command.php';
+load_file("abstract-command.php", "commands");
 
 /**
  * Testaa, onko käyttäjä kirjautuneena.
