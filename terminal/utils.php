@@ -57,24 +57,17 @@ function load_file($file_name, $dir_name = "") {
  * @return boolean 
  */
 function allow_include($file, $dir = TERMINAL_ROOT_DIR) {
-    // Ladattavan tiedoston on oltava terminaalin juurihakemiston alla.
-    if (!is_in_terminal_root_dir($file)) {
-        return FALSE;
-    }
-
-    // Tiedoston pitää olla vaaditun emohakemiston alla.
-    if (strpos($file, $dir) !== 0) {
-        return FALSE;
-    }
-
-    return TRUE;
+    // Tiedoston on oltava sekä terminaalin juurihakemiston että mahdollisen
+    // emohakemiston alla.
+    return is_in_dir($file, TERMINAL_ROOT_DIR) && is_in_dir($file, $dir);
 }
 
 /**
- * Kertoo, onko tiedosto terminaalin juurihakemiston alla.
+ * Kertoo, onko tiedosto hakemiston alla.
  * @param string $file_name Tiedoston oikea polku tiedostojärjestelmässä.
+ * @param string $dir Hakemiston oikea polku tiedostojärjestelmässä.
  * @return boolean Onko tiedosto terminaalin juurihakemiston alla. 
  */
-function is_in_terminal_root_dir($file_name) {
-    return strpos($file_name, TERMINAL_ROOT_DIR) !== 0;
+function is_in_dir($file, $dir) {
+    return strpos($file, $dir) == 0;
 }
