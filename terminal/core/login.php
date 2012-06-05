@@ -1,5 +1,7 @@
 <?php
 
+namespace core;
+
 /**
  * Hoitaa kirjautumisen ja muut siihen liittyvät toimenpiteet.
  *
@@ -12,7 +14,7 @@ class Login {
      * 
      * @return boolean
      */
-    public static function isLoggedIn() {
+    public static function is_logged_in() {
         return TRUE;
     }
 
@@ -22,14 +24,14 @@ class Login {
      * @param string $password Salasana
      * @return boolean Kertoo, onnistuiko kirjautuminen.
      */
-    public static function logIn($user, $password) {
+    public static function log_in($user, $password) {
         return TRUE;
     }
 
     /**
      * Kirjaa käyttäjän ulos.
      */
-    public static function logOut() {
+    public static function log_out() {
         
     }
 

@@ -2,16 +2,16 @@
 
 // Varmistetaan tarvittavien tiedostojen saanti.
 load_file("abstract-command.php", "commands");
+load_file("login.php", "core");
 
 /**
  * Testaa, onko käyttäjä kirjautuneena.
  * 
- * <pre>Pyyntö:
- * HEAD /login-test
- * 
+ * Pyyntö:
+ * <pre>HEAD /login-test HTTP/1.1</pre>
  * Vastaus:
- * HTTP/1.1 204 No Content
- * Logged-in: ${true|false}</pre>
+ * <pre>HTTP/1.1 204 No Content
+ * Logged-in: [boolean]</pre>
  * 
  * @author jukkah
  */
@@ -30,7 +30,10 @@ class LoginTest extends AbstractCommand {
      * @return void 
      */
     protected function execute_command() {
+        $logged_in = \core\Login::is_logged_in() ? "true" : "false";
         
+        header("HTTP/1.1 204 No Content");
+        header("Logged-in: $logged_in");
     }
 
 }
