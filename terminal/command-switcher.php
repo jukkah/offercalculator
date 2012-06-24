@@ -23,7 +23,7 @@ class CommandSwitcher {
         $command = $this->get_command();
 
         if (is_null($command)) {
-            header("HTTP/1.1 404 Not Found");
+            header("Status: 404 Not Found"); //Muutin headerin muodoksi status. Tämä on parempi tulevaisuutta ajatellen. @petjatouru
             return;
         }
 
@@ -31,9 +31,10 @@ class CommandSwitcher {
             $command->execute();
         } catch (Exception $e) {
             if (!($e instanceof BreakException)) {
+			
                 //TODO: Laitetaan virhe lokiin.
 
-                header("HTTP/1.1 500 Internal Server Error");
+                header("Status: 500 Internal Server Error"); //Muutin headerin muodoksi status. Tämä on parempi tulevaisuutta ajatellen. @petjatouru
             }
         }
     }

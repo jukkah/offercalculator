@@ -1,11 +1,12 @@
 <?php
+session_start(); // Alustaa istunnon
 
 namespace core;
 
 /**
  * Hoitaa kirjautumisen ja muut siihen liittyvät toimenpiteet.
  *
- * @author jukkah
+ * @author jukkah & petjatouru
  */
 class Login {
 
@@ -15,7 +16,7 @@ class Login {
      * @return boolean
      */
     public static function is_logged_in() {
-        return TRUE;
+        return $_SESSION["login_status"] || false;
     }
 
     /**
@@ -32,7 +33,7 @@ class Login {
      * Kirjaa käyttäjän ulos.
      */
     public static function log_out() {
-        
+        session_destroy(); // "Tappaa" eli lopettaa istunnon
     }
 
 }
