@@ -13,7 +13,7 @@ class CommandSwitcher {
     /**
      * Valitsee ja suorittaa HTTP-pyynnössä pyydetyn komennon.
      * 
-     * Mikäli komentoa ei löytynyt, keskeytetään suoritus HTTP-tilakoodiin 404.
+     * Mikäli komentoa ei löytynyt, keskeytetään suoritus HTTP-tilakoodiin 404. 
      * Mikäli komennon aikana tapahtui yllättävä virhe, lopetetaan suoritus
      * HTTP-tilakoodiin 500.
      * 
@@ -23,7 +23,10 @@ class CommandSwitcher {
         $command = $this->get_command();
 
         if (is_null($command)) {
-            header("Status: 404 Not Found"); //Muutin headerin muodoksi status. Tämä on parempi tulevaisuutta ajatellen. @petjatouru
+            // Muutin headerin muodoksi status. Tämä on parempi tulevaisuutta
+            // ajatellen. @petjatouru
+            header("Status: 404 Not Found");
+            
             return;
         }
 
@@ -34,7 +37,9 @@ class CommandSwitcher {
 			
                 //TODO: Laitetaan virhe lokiin.
 
-                header("Status: 500 Internal Server Error"); //Muutin headerin muodoksi status. Tämä on parempi tulevaisuutta ajatellen. @petjatouru
+                // Muutin headerin muodoksi status. Tämä on parempi
+                // tulevaisuutta ajatellen. @petjatouru
+                header("Status: 500 Internal Server Error");
             }
         }
     }
