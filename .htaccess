@@ -6,8 +6,8 @@ AddDefaultCharset UTF-8
 
 RewriteEngine On
 
-#Nämä tiedostoja ja hakemistoja ei ohjata.
+# Näitä tiedostoja tai hakemistoja ei ohjata.
 RewriteRule ^test/ - [L,NC]
 
-# Ohjataan terminaalille tulevat käskyt oikeaan paikkaan.
+# Ohjataan muut pyynnöt terminaalille.
 RewriteRule ^(.+)$ terminal/index.php?command=$1 [QSA,L]
