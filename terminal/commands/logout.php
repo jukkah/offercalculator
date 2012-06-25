@@ -32,7 +32,7 @@ class Logout extends AbstractCommand {
     protected function execute_command() {
         \core\Login::log_out();
 
-        header("HTTP/1.1 204 No Content");
+        header("Status: 204 No Content");
         header("Logged-in: false");
     }
 

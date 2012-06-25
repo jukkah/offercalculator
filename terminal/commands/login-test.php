@@ -31,8 +31,8 @@ class LoginTest extends AbstractCommand {
      */
     protected function execute_command() {
         $logged_in = \core\Login::is_logged_in() ? "true" : "false";
-        
-        header("HTTP/1.1 204 No Content");
+
+        header("Status: 204 No Content");
         header("Logged-in: $logged_in");
     }
 
