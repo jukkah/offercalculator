@@ -75,8 +75,8 @@ abstract class AbstractCommand implements Command {
      * @param string $error_code Vikakoodi, joka laitetaan otsakkeeseen.
      */
     protected function fail($error_code) {
-        header("Status: 400 Bad Request");
-        header("Error-code: $error_code");
+        header("HTTP/1.0 400 Bad Request");
+        header("Error-code: $error_code"); //Eikö ylempi rivi riitä?  --Petja
     }
 
     /**
