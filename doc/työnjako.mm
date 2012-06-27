@@ -92,8 +92,9 @@
   </body>
 </html></richcontent>
 </node>
-<node CREATED="1340731896110" ID="ID_827273736" MODIFIED="1340731940627" TEXT="Tarvitaan lis&#xe4;porukkaa">
+<node CREATED="1340731896110" ID="ID_827273736" MODIFIED="1340805919222" TEXT="Tarvitaan lis&#xe4;porukkaa">
 <font ITALIC="true" NAME="SansSerif" SIZE="12"/>
+<icon BUILTIN="yes"/>
 </node>
 </node>
 <node CREATED="1340778496085" ID="ID_1730773671" MODIFIED="1340778510055" POSITION="left" TEXT="Suunnittelu">
@@ -134,8 +135,9 @@
 <node CREATED="1340779468278" ID="ID_1528572669" MODIFIED="1340779477858" TEXT="Suunnittelee testit"/>
 <node CREATED="1340779496022" ID="ID_1456192626" MODIFIED="1340779502873" TEXT="Toteuttaa testit"/>
 </node>
-<node CREATED="1340779505343" ID="ID_91190544" MODIFIED="1340779517161" TEXT="Tarvitaan lis&#xe4;porukkaa">
+<node CREATED="1340779505343" ID="ID_91190544" MODIFIED="1340805931279" TEXT="Tarvitaan lis&#xe4;porukkaa">
 <font ITALIC="true" NAME="SansSerif" SIZE="12"/>
+<icon BUILTIN="yes"/>
 </node>
 </node>
 </node>
