@@ -12,9 +12,9 @@ class LoginTest extends \Enhance\TestFixture {
 
     public function setUp() {
         session_start();
+        \core\Login::log_out();
     }
     public function tearDown() {
-        \core\Login::log_out();
         session_destroy();
     }
 
@@ -22,7 +22,7 @@ class LoginTest extends \Enhance\TestFixture {
     public function normaalisti_ei_olla_kirjautuneena() {
         \Enhance\Assert::isFalse(\core\Login::is_logged_in());
     }
-    public function istuntomuuttuja_määrää_kirjautuneisuuden_tilan() {
+    public function istuntomuuttuja_maaraa_kirjautuneisuuden_tilan() {
         # Asetetaan muuttujan arvoksi TRUE.
         $_SESSION["login_status"] = TRUE;
         # Ollaan kirjautuneena.
@@ -55,7 +55,7 @@ class LoginTest extends \Enhance\TestFixture {
     }
 
     # == log_in ================================================================
-    public function tyhjillä_tunnuksilla_ei_voi_kirjautua() {
+    public function tyhjilla_tunnuksilla_ei_voi_kirjautua() {
         # Tyhjillä tunnuksilla ei voi kirjautua.
         \Enhance\Assert::isFalse(\core\Login::log_in("", ""));
     }
@@ -66,7 +66,7 @@ class LoginTest extends \Enhance\TestFixture {
         # Tyhjällä käyttäjätunnuksella ei voi kirjautua.
         \Enhance\Assert::isFalse(\core\Login::log_in("", "test"));
     }
-    public function väärillä_tunnuksilla_ei_voi_kirjautua() {
+    public function vaarilla_tunnuksilla_ei_voi_kirjautua() {
         # Väärällä käyttäjätunnuksella ei voi kirjautua.
         \Enhance\Assert::isFalse(\core\Login::log_in("wrong", "test"));
 
@@ -80,14 +80,14 @@ class LoginTest extends \Enhance\TestFixture {
         # Oikeilla tunnuksilla voi kirjautua.
         \Enhance\Assert::isTrue(\core\Login::log_in("test", "test"));
     }
-    public function oikeilla_tunnuksilla_voi_kirjautua_peräkkäin() {
+    public function oikeilla_tunnuksilla_voi_kirjautua_perakkain() {
         # Oikeilla tunnuksilla voi kirjautua peräkkäin.
         \core\Login::log_in("test", "test");
         \Enhance\Assert::isTrue(\core\Login::log_in("test2", "test"));
         # Ollaan kirjautuneena.
         \Enhance\Assert::isTrue(\core\Login::is_logged_in());
     }
-    public function epäonnistunut_kirjautumisyritys_ei_kirjaa_ulos_edellistä_onnistunutta_kirjautumista() {
+    public function epaonnistunut_kirjautumisyritys_ei_kirjaa_ulos_edellista_onnistunutta_kirjautumista() {
         # Oikeilla tunnuksilla voi kirjautua peräkkäin.
         \core\Login::log_in("test", "test");
         \core\Login::log_in("wrong", "wrong");
@@ -96,7 +96,7 @@ class LoginTest extends \Enhance\TestFixture {
     }
 
     # == log_in + is_logged_in =================================================
-    public function epäonnistuneen_kirjautumisyrityksen_jälkeen_ei_olla_kirjautuneena() {
+    public function epaonnistuneen_kirjautumisyrityksen_jalkeen_ei_olla_kirjautuneena() {
         # Kirjautuminen ei onnistu tyhjillä tunnuksilla.
         \core\Login::log_in("", "");
         # Ei olla kirjautuneena.
@@ -127,7 +127,7 @@ class LoginTest extends \Enhance\TestFixture {
         # Ei olla kirjautuneena.
         \Enhance\Assert::isFalse(\core\Login::is_logged_in());
     }
-    public function onnistuneen_kirjautumisen_jälkeen_ollaan_kirjautuneena() {
+    public function onnistuneen_kirjautumisen_jalkeen_ollaan_kirjautuneena() {
         # Kirjautuminen onnistuu oikeilla tunnuksilla.
         \core\Login::log_in("test", "test");
         # Ollaan kirjautuneena.
@@ -135,7 +135,7 @@ class LoginTest extends \Enhance\TestFixture {
     }
 
     # == log_out + is_logged_in ================================================
-    public function pelkän_uloskirjautumisen_jälkeen_ei_olla_kirjautuneena() {
+    public function pelkan_uloskirjautumisen_jalkeen_ei_olla_kirjautuneena() {
         # Kirjaudutaan ulos.
         \core\Login::log_out();
         # Ei olla kirjautuneena.
@@ -143,7 +143,7 @@ class LoginTest extends \Enhance\TestFixture {
     }
     
     # == log_in + log_out + is_logged_in =======================================
-    public function onnistuneen_kirjautumisen_ja_uloskirjautumisen_jälkeen_ei_olla_kirjautuneena() {
+    public function onnistuneen_kirjautumisen_ja_uloskirjautumisen_jalkeen_ei_olla_kirjautuneena() {
         # Kirjautuminen onnistuu oikeilla tunnuksilla.
         \core\Login::log_in("test", "test");
         # Kirjaudutaan ulos.
@@ -151,7 +151,7 @@ class LoginTest extends \Enhance\TestFixture {
         # Ei olla kirjautuneena.
         \Enhance\Assert::isFalse(\core\Login::is_logged_in());
     }
-    public function epäonnistuneen_kirjautumisen_ja_uloskirjautumisen_jälkeen_ei_olla_kirjautuneena() {
+    public function epaonnistuneen_kirjautumisen_ja_uloskirjautumisen_jalkeen_ei_olla_kirjautuneena() {
         # Kirjautuminen ei onnistu väärillä tunnuksilla.
         \core\Login::log_in("wrong", "wrong");
         # Kirjaudutaan ulos.
