@@ -1,6 +1,6 @@
 == TIEDOKSI ==
 
-.mm-p‰‰tteiset tiedostot ovat ajatuskartta (mindmap) -tiedostoja. Niiden avaamisen 
+.mm-p√§√§tteiset tiedostot ovat ajatuskartta (mindmap) -tiedostoja. Niiden avaamisen 
 tarvitset FreeMind-ohjelman, jonka voit ladata seuraavasta osoitteesta:
 
 http://freemind.sourceforge.net/wiki/index.php/Main_Page
@@ -13,5 +13,5 @@ Insert		Uusi kupla
 Del		Poistaa valitun kuplan
 Ctrl+B		Lihavoi koko kuplan tekstin
 Ctrl+I		Kursivoi koko kuplan tekstin
-F2		Muokkaa kuplan teksti‰
-Alt+Enter	Muokkaa kuplan HTML:‰‰
+F2		Muokkaa kuplan teksti√§
+Alt+Enter	Muokkaa kuplan HTML:√§√§
