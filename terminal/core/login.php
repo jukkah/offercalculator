@@ -1,5 +1,4 @@
 <?php
-session_start(); // Alustaa istunnon
 
 namespace core;
 

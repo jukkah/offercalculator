@@ -4,6 +4,9 @@
  * Sekalaisia funktioita.
  */
 
+// Varmistetaan, että istunto on aina käytettävissä.
+session_start();
+
 // Pilkkoo command-parametrin taulukoksi /-merkin kohdalta.
 if (isset($_REQUEST["command"])) {
     $_REQUEST["command"] = explode("/", $_REQUEST["command"]);

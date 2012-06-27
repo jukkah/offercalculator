@@ -141,7 +141,7 @@ class LoginTest extends \Enhance\TestFixture {
         # Ei olla kirjautuneena.
         \Enhance\Assert::isFalse(\core\Login::is_logged_in());
     }
-    
+
     # == log_in + log_out + is_logged_in =======================================
     public function onnistuneen_kirjautumisen_ja_uloskirjautumisen_jalkeen_ei_olla_kirjautuneena() {
         # Kirjautuminen onnistuu oikeilla tunnuksilla.
@@ -158,6 +158,77 @@ class LoginTest extends \Enhance\TestFixture {
         \core\Login::log_out();
         # Ei olla kirjautuneena.
         \Enhance\Assert::isFalse(\core\Login::is_logged_in());
+    }
+
+    
+    
+    public function core001_Normaalisti_ei_olla_kirjautuneena() {
+        # Ei olla kirjautuneena.
+        \Enhance\Assert::isFalse(\core\Login::is_logged_in());
+    }
+    public function core002_Istuntomuuttuja_maaraa_kirjautuneisuuden() {
+        # Asetetaan muuttujan arvoksi NULL.
+        $_SESSION['logged_in_user_id'] = NULL;
+        # Ei olla kirjautuneena.
+        \Enhance\Assert::isFalse(\core\Login::is_logged_in());
+
+        # Asetetaan muuttujan arvoksi 10.
+        $_SESSION['logged_in_user_id'] = 10;
+        # Ollaan kirjautuneena.
+        \Enhance\Assert::isTrue(\core\Login::is_logged_in());
+
+        # Poistetaan muuttuja.
+        unset($_SESSION['logged_in_user_id']);
+        # Ei olla kirjautuneena.
+        \Enhance\Assert::isFalse(\core\Login::is_logged_in());
+    }
+    public function core003_Vaillinainen_kirjautuminen() {
+        $user_name = "Test1User";
+        $password = "-T3%es4\$tPa[2s@7s";
+
+        # Varmistetaan, että kirjautuminen on mahdollista.
+        luo_kayttaja($user_name, $password);
+
+        # Kirjautuminen ei onnistu vaillinaisilla tunnuksilla.
+        \Enhance\Assert::isFalse(\core\Login::log_in("", ""));
+        \Enhance\Assert::isFalse(\core\Login::log_in($user_name, ""));
+        \Enhance\Assert::isFalse(\core\Login::log_in("", $password));
+
+        # Ei olla kirjautuneena.
+        \Enhance\Assert::isFalse(\core\Login::is_logged_in());
+    }
+    public function core004_Virheellisilla_tunnuksilla_kirjautuminen() {
+        $user_name = "Test1User";
+        $password = "-T3%es4\$tPa[2s@7s";
+
+        # Varmistetaan, että kirjautuminen on mahdollista.
+        luo_kayttaja($user_name, $password);
+
+        # Kirjautuminen ei onnistu virheellisillä tunnuksilla.
+        \Enhance\Assert::isFalse(\core\Login::log_in("", ""));
+        \Enhance\Assert::isFalse(\core\Login::log_in($user_name, ""));
+        \Enhance\Assert::isFalse(\core\Login::log_in("", $password));
+        \Enhance\Assert::isFalse(\core\Login::log_in($password, $user_name));
+
+        # Ei olla kirjautuneena.
+        \Enhance\Assert::isFalse(\core\Login::is_logged_in());
+    }
+    public function core005_Oikeilla_tunnuksilla_kirjautuminen() {
+        $user_name = "Test1User";
+        $password = "-T3%es4\$tPa[2s@7s";
+
+        # Varmistetaan, että kirjautuminen on mahdollista.
+        luo_kayttaja($user_name, $password);
+
+        # Kirjautuminen ei onnistu virheellisillä tunnuksilla.
+        \Enhance\Assert::isTrue(\core\Login::log_in($user_name, $password));
+        \Enhance\Assert::isTrue(\core\Login::is_logged_in());
+
+        # Kirjautuneen käyttäjän ID on Test1User:in ID.
+        $kayttajan_id_tietokannassa = kayttajan_id($user_name);
+        $kayttajan_id_istunnossa = $_SESSION['logged_in_user_id'];
+        $sama_id = $kayttajan_id_istunnossa == $kayttajan_id_tietokannassa;
+        \Enhance\Assert::isTrue($sama_id);
     }
 
 }
