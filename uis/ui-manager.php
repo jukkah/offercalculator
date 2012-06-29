@@ -1,0 +1,5 @@
+<?php
+
+	// Tähän tulee koodia
+
+?>
