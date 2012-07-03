@@ -13,7 +13,11 @@ localization =
 	"Jobs"							:	"Jobs",
 	"Tools"							:	"Tools",
 	"Products"						:	"Products",
-	"LangFi"						:	"Suomeksi",
-	"LangGB"						:	"In English",
-	"LangSv"						:	"På Svenska"
+	"ChangeLanguage"				:	"Change language",
+	"StandardProducts"				:	"Standard products",
+	"ComplexProducts"				:	"Complex products",
+	"Calculations"					:	"Calculations",
+	"NormalCalculations"			:	"Normal offercalculations",
+	"Other"							:	"Other",
+	"CalculationBases"				:	"Calculation bases"
 };

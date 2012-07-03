@@ -13,6 +13,7 @@ $(function(){
 
 	// Menubar
 	$("#menuBar").kendoMenu();
+	$("#bottomBar").kendoMenu();
 	
 	localize(); // Jos kieltä vaihdetaan, kutsu funktiota reLocalize("kieli")
 

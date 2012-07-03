@@ -14,6 +14,11 @@ localization =
 	"Tools"							:	"Työkalut ja välineet",
 	"Products"						:	"Tuotteet",
 	"LangFi"						:	"Suomeksi",
-	"LangGB"						:	"In English",
-	"LangSv"						:	"På Svenska"
+	"ChangeLanguage"				:	"Vaihda kieli",
+	"StandardProducts"				:	"Vakiotuotteet",
+	"ComplexProducts"				:	"Monimutkaiset tuotteet",
+	"Calculations"					:	"Laskelmat",
+	"NormalCalculations"			:	"Normaalit tarjouslaskelmat",
+	"Other"							:	"Muu",
+	"CalculationBases"				:	"Laskelmapohjat"
 };

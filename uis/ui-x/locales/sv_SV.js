@@ -13,7 +13,11 @@ localization =
 	"Jobs"							:	"Arbete",
 	"Tools"							:	"Verktyg och instrument",
 	"Products"						:	"Produkter",
-	"LangFi"						:	"Suomeksi",
-	"LangGB"						:	"In English",
-	"LangSv"						:	"På Svenska"
+	"ChangeLanguage"				:	"Ändra språk",
+	"StandardProducts"				:	"Standardprodukter",
+	"ComplexProducts"				:	"Komplexa produkter",
+	"Calculations"					:	"Beräkningarna",
+	"NormalCalculations"			:	"Normala bid beräkningar",
+	"Other"							:	"Andra",
+	"CalculationBases"				:	"Beräkningsgrunder"
 };
