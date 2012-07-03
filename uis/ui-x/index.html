@@ -3,6 +3,8 @@
 	<head>
 		<title>Tarjouslaskelmaprojekti</title>
 		
+		<script src="locales/fi_FI.js" id="localizationScript"></script>
+		
 		<script src="js/jquery.min.js"></script>
 		<script src="js/kendo.web.min.js"></script>
 		<script src="js/console.js"></script>
@@ -17,21 +19,21 @@
 	</head>
 	<body>
 	
-		<h1>Tarjouslaskelmaprojekti</h1>
+		<h1><span class="ProjectFullName"></span></h1>
 		<ul id="menuBar">
 		
-			<li><b>Testikäyttäjä 1</b><ul>
-				<li>Omat asetukset</li>
-				<li>Kirjaudu ulos</li>
+			<li><b><span class="UserName"></span></b><ul>
+				<li><span class="MySettings"></span></li>
+				<li><span class="LogOut"></span></li>
 			</ul></li>
 
-			<li>Tuotannontekijät<ul>
-				<li>Raaka-aineet</li>
-				<li>Työt</li>
-				<li>Työkalut ja välineet</li>
+			<li><span class="ProductionCause"></span><ul>
+				<li><span class="RawMaterial"></span></li>
+				<li><span class="Jobs"></span></li>
+				<li><span class="Tools"></span></li>
 			</ul></li>
 			
-			<li>Tuotteet<ul>
+			<li><span class="Products"></span><ul>
 				<li>Vakiotuotteet</li>
 				<li>Monimutkaiset tuotteet</li>
 			</ul></li>
@@ -48,7 +50,14 @@
 		
 		<br /><br />
 		
-		Sisältö tulee tähän....
+		Sisältö tulee tähän...
+		
+		<br /><br />
+		
+		Vaihda kieli<br />
+		<a href="javascript:reLocalize('fi_FI')"><span class="LangFi"></span></a> 
+		<a href="javascript:reLocalize('en_GB')"><span class="LangGB"></span></a> 
+		<a href="javascript:reLocalize('sv_SV')"><span class="LangSv"></span></a> 
 		
 		<br /><br />
 		
