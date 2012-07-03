@@ -15,6 +15,18 @@ $(function(){
 	$("#menuBar").kendoMenu();
 	$("#bottomBar").kendoMenu();
 	
-	localize(); // Jos kieltä vaihdetaan, kutsu funktiota reLocalize("kieli")
+	localize();
+	
+	$("#localizeFi").click(function(){
+		reLocalize("fi_FI");
+	});
+	
+	$("#localizeGB").click(function(){
+		reLocalize("en_GB");
+	});
+	
+	$("#localizeSv").click(function(){
+		reLocalize("sv_SV");
+	});
 
 });
