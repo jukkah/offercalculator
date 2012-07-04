@@ -1,0 +1,16 @@
+body {
+	font-family:Verdana,Geneva,sans-serif;
+	font-size:12px;
+}
+.Icon32{
+	margin-bottom:-8px;
+}
+.Icon16{
+	margin-bottom:-4px;
+}
+.authorsLink{
+	float:right;
+}
+.linkBar{
+	color:#C0C0C0;
+}
