@@ -20,8 +20,8 @@ $.each(localization, function(k, v){
 });
 }
 function reLocalize(lang){
-	$(document).append("<script src=\"locales/"+lang+".js\"></script>"); // Lataa sanaston
-	localize(); // Ottaa sanaston käyttöön
+	$(document).append("<script src=\"locales/"+lang+".js\"></script>");
+	localize();
 }
 
 $(function(){
