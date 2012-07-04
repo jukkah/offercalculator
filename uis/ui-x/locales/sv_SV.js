@@ -19,5 +19,12 @@ localization =
 	"Calculations"					:	"Beräkningarna",
 	"NormalCalculations"			:	"Normala bid beräkningar",
 	"Other"							:	"Andra",
-	"CalculationBases"				:	"Beräkningsgrunder"
+	"CalculationBases"				:	"Beräkningsgrunder",
+	"LogIn"							:	"Logga in",
+	"Register"						:	"Registrera",
+	"PasswordReset"					:	"Återställ ditt lösenord",
+	"Password"						:	"Lösenord",
+	"LogButton"						:	"Logga",
+	"Authors"						:	"Författarna",
+	"AuthorsParagraph"				:	"Genomförandet av projektet har deltagit i"
 };

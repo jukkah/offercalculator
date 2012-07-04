@@ -13,12 +13,18 @@ localization =
 	"Jobs"							:	"Työt",
 	"Tools"							:	"Työkalut ja välineet",
 	"Products"						:	"Tuotteet",
-	"LangFi"						:	"Suomeksi",
 	"ChangeLanguage"				:	"Vaihda kieli",
 	"StandardProducts"				:	"Vakiotuotteet",
 	"ComplexProducts"				:	"Monimutkaiset tuotteet",
 	"Calculations"					:	"Laskelmat",
 	"NormalCalculations"			:	"Normaalit tarjouslaskelmat",
 	"Other"							:	"Muu",
-	"CalculationBases"				:	"Laskelmapohjat"
+	"CalculationBases"				:	"Laskelmapohjat",
+	"LogIn"							:	"Kirjaudu sisään",
+	"Register"						:	"Rekisteröidy",
+	"PasswordReset"					:	"Palauta salasana",
+	"Password"						:	"Salasana",
+	"LogButton"						:	"Kirjaudu",
+	"Authors"						:	"Tekijät",
+	"AuthorsParagraph"				:	"Tämän projektin toteuttamiseen ovat osallistuneet"
 };
