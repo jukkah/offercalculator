@@ -1,0 +1,11 @@
+<?php
+
+$data = array(
+    "logged-in" => $this->logged_in
+);
+
+if(isset($this->error_code)) {
+    $data["error-code"] = $this->error_code;
+}
+
+echo Zend_JSON::encode($data);
