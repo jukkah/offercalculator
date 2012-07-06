@@ -19,5 +19,12 @@ localization =
 	"Calculations"					:	"Calculations",
 	"NormalCalculations"			:	"Normal offercalculations",
 	"Other"							:	"Other",
-	"CalculationBases"				:	"Calculation bases"
+	"CalculationBases"				:	"Calculation bases",
+	"LogIn"							:	"Login",
+	"Register"						:	"Register",
+	"PasswordReset"					:	"Reset password",
+	"Password"						:	"Password",
+	"LogButton"						:	"Log",
+	"Authors"						:	"Authors",
+	"AuthorsParagraph"				:	"The implementation of the project have participated in"
 };
