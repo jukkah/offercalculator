@@ -26,5 +26,9 @@ localization =
 	"Password"						:	"Lösenord",
 	"LogButton"						:	"Logga",
 	"Authors"						:	"Författarna",
-	"AuthorsParagraph"				:	"Genomförandet av projektet har deltagit i"
+	"AuthorsParagraph"				:	"Genomförandet av projektet har deltagit i",
+	"noUsername"					:	"Användarnamn saknas!",
+	"noPassword"					:	"Lösenord saknas!",
+	"incorrectLogin"				:	"Användarnamn och/eller lösenord är felaktigt!",
+	"unknownError"					:	"Okänt fel!"
 };

@@ -19,9 +19,47 @@ $.each(localization, function(k, v){
                  .attr("alt", v);
 });
 }
+
 function reLocalize(lang){
 	$(document).append("<script src=\"locales/"+lang+".js\"></script>");
 	localize();
+}
+
+function logIn(){
+	$("#loginName").attr("disabled","disabled");
+	$("#loginPassword").attr("disabled","disabled");
+	$("#loginButton").attr("disabled","disabled");
+	var loginrequest = $.ajax({
+		type: "HEAD",
+		url: "../../terminal/index.php?command=login",
+		data: [],
+		cache: false
+	}).done(function(loginResponse) {
+		$("#loginName").removeAttr("disabled");
+		$("#loginPassword").removeAttr("disabled");
+		$("#loginButton").removeAttr("disabled");
+		$("#loginError").clearQueue();
+		$("#loginError").fadeOut("fast");
+		$("#loginError").slideDown("fast");
+			if(loginResponse["error-code"]){
+				switch(loginResponse["error-code"]){
+					case ["1-username",""]:
+						$("#loginErrorText").html(localization["noUsername"]);
+					break;
+					case ["1-password",""]:
+						$("#loginErrorText").html(localization["noPassword"]);
+					break;
+					case ["2",""]:
+						$("#loginErrorText").html(localization["incorrectLogin"]);
+					break;
+					default:
+						$("#loginErrorText").html(localization["unknownError"]);
+					break;
+				}
+			}else{
+				$("#loginErrorText").html(localization["unknownError"]);
+			}
+	});
 }
 
 $(function(){
@@ -32,6 +70,7 @@ $(function(){
 	
 	localize();
 	
+	// Localization buttons:
 	$(".localizeFi").click(function(){
 		reLocalize("fi_FI");
 	});
@@ -47,6 +86,7 @@ $(function(){
 	$(".authorsLink").click(function(){
 		authorswindow.open();
 	});
+	//
 	
 	loginwindow = 
 	$("#loginWindow").kendoWindow({
@@ -82,6 +122,10 @@ $(function(){
 		}else{
 			loginwindow.close();
 		}
+	});
+	
+	$("#loginButton").click(function(){
+		logIn();
 	});
 
 });

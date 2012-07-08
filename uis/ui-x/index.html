@@ -19,12 +19,13 @@
 	</head>
 	<body>
 		<div id="loginWindow">
+			<div id="loginError"><img src="images/cancel.png" class="Icon16" /> <span id="loginErrorText"></span></div>
 			<h2><span class="LogIn"></span></h2>
 			<img src="images/user.png" class="UserName Icon32" /> 
-			<input type="text" class="UserName" /> <small><a href="#" class="Register"></a></small><br /><br />
+			<input type="text" class="UserName" id="loginName" /> <small><a href="#" class="Register"></a></small><br /><br />
 			<img src="images/key.png" class="Password Icon32" /> 
-			<input type="password" class="Password" /> <small><a href="#" class="PasswordReset"></a></small><br /><br />
-			<input type="submit" class="LogButton" /><br /><br /><br /><br /><br /><br />
+			<input type="password" class="Password" id="loginPassword" /> <small><a href="#" class="PasswordReset"></a></small><br /><br />
+			<input type="submit" class="LogButton" id="loginButton" /><br /><br /><br />
 			<span class="linkBar"><a class="localizeFi"><img src="images/fi.png" class="Icon16"></img></a> <a class="localizeGB"><img src="images/gb.png" class="Icon16"></img></a> <a class="localizeSv"><img src="images/sv.png" class="Icon16"></img></a><a class="Authors authorsLink"></a></span>
 		</div>
 		<div id="authorsWindow">

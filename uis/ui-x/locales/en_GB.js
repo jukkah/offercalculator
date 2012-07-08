@@ -26,5 +26,9 @@ localization =
 	"Password"						:	"Password",
 	"LogButton"						:	"Log",
 	"Authors"						:	"Authors",
-	"AuthorsParagraph"				:	"The implementation of the project have participated in"
+	"AuthorsParagraph"				:	"The implementation of the project have participated in",
+	"noUsername"					:	"Username is missing!",
+	"noPassword"					:	"Password is missing!",
+	"incorrectLogin"				:	"Username and/or password is incorrect!",
+	"unknownError"					:	"Unknown error!"
 };

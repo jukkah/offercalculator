@@ -26,5 +26,9 @@ localization =
 	"Password"						:	"Salasana",
 	"LogButton"						:	"Kirjaudu",
 	"Authors"						:	"Tekijät",
-	"AuthorsParagraph"				:	"Tämän projektin toteuttamiseen ovat osallistuneet"
+	"AuthorsParagraph"				:	"Tämän projektin toteuttamiseen ovat osallistuneet",
+	"noUsername"					:	"Käyttäjätunnus jäi antamatta!",
+	"noPassword"					:	"Salasana jäi antamatta!",
+	"incorrectLogin"				:	"Tunnus ja/tai salasana on väärin!",
+	"unknownError"					:	"Tuntematon virhe!"
 };

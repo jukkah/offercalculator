@@ -8,9 +8,37 @@ body {
 .Icon16{
 	margin-bottom:-4px;
 }
+input[type=button], input[type=submit]{
+	background-color:#FFF;
+	
+	/* Internet Explorer ja muiden selaimien vanhat versiot */
+	border:1px solid #C0C0C0;
+	border-bottom:2px solid #C0C0C0;
+	
+	/* CSS3:a tukevat selaimet */
+	background-image: linear-gradient(bottom, #F0F0F0 25%, #FFFFFF 75%);
+	background-image: -o-linear-gradient(bottom, #F0F0F0 25%, #FFFFFF 75%);
+	background-image: -moz-linear-gradient(bottom, #F0F0F0 25%, #FFFFFF 75%);
+	background-image: -webkit-linear-gradient(bottom, #F0F0F0 25%, #FFFFFF 75%);
+	background-image: -ms-linear-gradient(bottom, #F0F0F0 25%, #FFFFFF 75%);
+	border:1px solid rgba(0,0,0,0.25);
+	border-bottom:2px solid rgba(0,0,0,0.25);
+	border-radius:3px;
+	
+	background-color:#F0F0F0;
+}
 .authorsLink{
 	float:right;
 }
 .linkBar{
 	color:#C0C0C0;
+}
+#loginError{
+	background-color:#FFE8E8;
+	border-radius:3px;
+	display:none;
+	color:#C00000;
+	padding:8px;
+	margin-top:-8px;
+	margin-bottom:4px;
 }
