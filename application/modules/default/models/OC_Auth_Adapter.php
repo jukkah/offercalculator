@@ -1,5 +1,7 @@
 <?php
 
+require_once 'Zend/Auth/Adapter/Exception.php';
+
 class OC_Auth_Adapter extends Zend_Auth_Adapter_DbTable
 {
 
@@ -176,10 +178,6 @@ class OC_Auth_Adapter extends Zend_Auth_Adapter_DbTable
         }
 
         if (null !== $exception) {
-            /**
-             * @see Zend_Auth_Adapter_Exception
-             */
-            require_once 'Zend/Auth/Adapter/Exception.php';
             throw new Zend_Auth_Adapter_Exception($exception);
         }
 
@@ -230,10 +228,6 @@ class OC_Auth_Adapter extends Zend_Auth_Adapter_DbTable
                 unset($origDbFetchMode);
             }
         } catch (Exception $e) {
-            /**
-             * @see Zend_Auth_Adapter_Exception
-             */
-            require_once 'Zend/Auth/Adapter/Exception.php';
             throw new Zend_Auth_Adapter_Exception('The supplied parameters to OC_Auth_Adapter failed to '
                                                 . 'produce a valid sql statement, please check table and column names '
                                                 . 'for validity.', 0, $e);

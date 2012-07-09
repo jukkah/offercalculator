@@ -1,9 +1,6 @@
 <?php
 
-// Tätä ei pitäisi tarvita, mutta ilman tulee virheilmoitus.
-require_once APPLICATION_PATH . '/modules/default/models/Login.php';
-
-class LoginController extends Zend_Controller_Action
+class Default_LoginController extends Zend_Controller_Action
 {
 
     public function init()
@@ -15,13 +12,13 @@ class LoginController extends Zend_Controller_Action
         $error_codes = array();
 
         // Noudetaan ja validoidaan parametrit.
-        $username = $this->_getParam("username", $error_codes);
-        $password = $this->_getParam("password", $error_codes);
+        $username = $this->_getRequiredParam("username", $error_codes);
+        $password = $this->_getRequiredParam("password", $error_codes);
 
         // Mikäli ei ole virheitä, eli sekä tunnus että salasana on välitetty,
         // yritetään kirjautua sisään.
         if (count($error_codes) == 0) {
-            $this->_log_in($username, $password, $error_codes);
+            $this->_logIn($username, $password, $error_codes);
         }
 
         // Mikäli on virheitä, palautetaan nooden vikakoodit.
@@ -39,13 +36,13 @@ class LoginController extends Zend_Controller_Action
         $login = Default_Model_Login::getInstance();
 
         // Tarkistetaan kirjautuneisuus.
-        $this->view->logged_in = $login->is_logged_in();
+        $this->view->logged_in = $login->isLoggedIn();
     }
 
     public function outAction()
     {
         // Kirjaudutaan ulos.
-        Default_Model_Login::getInstance()->log_out();
+        Default_Model_Login::getInstance()->logOut();
     }
     
     /**
@@ -57,7 +54,7 @@ class LoginController extends Zend_Controller_Action
      * sijoitetaan.
      * @return mixed Parametrin arvo.
      */
-    protected function _getParam($name, &$error_codes)
+    protected function _getRequiredParam($name, &$error_codes)
     {
         $param = $this->_request->getParam($name);
         
@@ -79,13 +76,13 @@ class LoginController extends Zend_Controller_Action
      * @param array $error_codes Taulukko, johon mahdollinen vikakoodi
      * sijoitetaan.
      */
-    protected function _log_in($username, $password, &$error_codes)
+    protected function _logIn($username, $password, &$error_codes)
     {
         // Otetaan käyttöön tarvittavat muuttujat.
         $login = Default_Model_Login::getInstance();
         
         // Kirjaudutaan sisään.
-        $login_successed = $login->log_in($username, $password);
+        $login_successed = $login->logIn($username, $password);
 
         // Tarkistetaan, epäonnistuiko kirjautuminen.
         if (!$login_successed) {

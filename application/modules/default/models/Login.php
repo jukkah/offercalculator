@@ -45,7 +45,7 @@ class Default_Model_Login
         return self::$_instance;
     }
 
-    public function log_in($username, $password)
+    public function logIn($username, $password)
     {
         // Alustetaan tarvittavat muuttujat.
         $auth = OC_Auth::getInstance();
@@ -65,13 +65,13 @@ class Default_Model_Login
         return $result->isValid();
     }
 
-    public function log_out()
+    public function logOut()
     {
         // Poistetaan mahdollinen identiteetti.
         Zend_Auth::getInstance()->clearIdentity();
     }
 
-    public function is_logged_in()
+    public function isLoggedIn()
     {
         // Tarkistetaan, onko voimassa olevaa identiteettiä.
         return Zend_Auth::getInstance()->hasIdentity();
