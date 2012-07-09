@@ -16,13 +16,12 @@
  * @package    Zend_Filter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: UpperCase.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Filter_StringToUpper
- */
-require_once 'Zend/Filter/StringToUpper.php';
+namespace Zend\Filter\File;
+
+use Zend\Filter\StringToUpper;
+use Zend\Filter\Exception;
 
 /**
  * @category   Zend
@@ -30,53 +29,38 @@ require_once 'Zend/Filter/StringToUpper.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Filter_File_UpperCase extends Zend_Filter_StringToUpper
+class UpperCase extends StringToUpper
 {
     /**
-     * Adds options to the filter at initiation
-     *
-     * @param string $options
-     */
-    public function __construct($options = null)
-    {
-        if (!empty($options)) {
-            $this->setEncoding($options);
-        }
-    }
-
-    /**
-     * Defined by Zend_Filter_Interface
+     * Defined by Zend\Filter\FilterInterface
      *
      * Does a lowercase on the content of the given file
      *
      * @param  string $value Full path of file to change
      * @return string The given $value
-     * @throws Zend_Filter_Exception
+     * @throws Exception\RuntimeException
+     * @throws Exception\InvalidArgumentException
      */
     public function filter($value)
     {
         if (!file_exists($value)) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception("File '$value' not found");
+            throw new Exception\InvalidArgumentException("File '$value' not found");
         }
 
         if (!is_writable($value)) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception("File '$value' is not writable");
+            throw new Exception\InvalidArgumentException("File '$value' is not writable");
         }
 
         $content = file_get_contents($value);
         if (!$content) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception("Problem while reading file '$value'");
+            throw new Exception\RuntimeException("Problem while reading file '$value'");
         }
 
         $content = parent::filter($content);
         $result  = file_put_contents($value, $content);
 
         if (!$result) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception("Problem while writing file '$value'");
+            throw new Exception\RuntimeException("Problem while writing file '$value'");
         }
 
         return $value;

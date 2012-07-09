@@ -17,9 +17,9 @@
  * @subpackage Client
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Common.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
+namespace Zend\Soap\Client;
 
 if (extension_loaded('soap')) {
 
@@ -28,7 +28,7 @@ if (extension_loaded('soap')) {
  * @package    Zend_Soap
  * @subpackage Client
  */
-class Zend_Soap_Client_Common extends SoapClient
+class Common extends \SoapClient
 {
     /**
      * doRequest() pre-processing method

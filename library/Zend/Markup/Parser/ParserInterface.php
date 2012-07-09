@@ -17,8 +17,9 @@
  * @subpackage Parser
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: ParserInterface.php 24594 2012-01-05 21:27:01Z matthew $
  */
+
+namespace Zend\Markup\Parser;
 
 /**
  * @category   Zend
@@ -27,41 +28,41 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_Markup_Parser_ParserInterface
+interface ParserInterface
 {
+
+    /**
+     * Constructor
+     *
+     * @param array|\Traversable $options
+     */
+    public function __construct($options = array());
+
     /**
      * Parse a string
      *
-     * This should output something like this:
-     *
-     * <code>
-     * array(
-     *     array(
-     *         'tag'        => '[tag="a" attr=val]',
-     *         'type'       => Zend_Markup::TYPE_TAG,
-     *         'name'       => 'tag',
-     *         'stoppers'   => array('[/]', '[/tag]'),
-     *         'attributes' => array(
-     *             'tag'  => 'a',
-     *             'attr' => 'val'
-     *         )
-     *     ),
-     *     array(
-     *         'tag'   => 'value',
-     *         'type'  => Zend_Markup::TYPE_NONE
-     *     ),
-     *     array(
-     *         'tag'        => '[/tag]',
-     *         'type'       => Zend_Markup::TYPE_STOPPER,
-     *         'name'       => 'tag',
-     *         'stoppers'   => array(),
-     *         'attributes' => array()
-     *     )
-     * )
-     * </code>
-     *
      * @param  string $value
+     *
      * @return array
      */
     public function parse($value);
+
+    /**
+     * Build a tree with a certain strategy
+     *
+     * @param array $tokens
+     * @param string $strategy
+     *
+     * @return \Zend\Markup\TokenList
+     */
+    public function buildTree(array $tokens, $strategy = 'default');
+
+    /**
+     * Tokenize a string
+     *
+     * @param string $value
+     *
+     * @return array
+     */
+    public function tokenize($value);
 }

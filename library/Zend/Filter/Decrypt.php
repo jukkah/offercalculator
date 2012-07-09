@@ -16,13 +16,9 @@
  * @package    Zend_Filter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Decrypt.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Filter_Encrypt
- */
-require_once 'Zend/Filter/Encrypt.php';
+namespace Zend\Filter;
 
 /**
  * Decrypts a given string
@@ -32,10 +28,10 @@ require_once 'Zend/Filter/Encrypt.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Filter_Decrypt extends Zend_Filter_Encrypt
+class Decrypt extends Encrypt
 {
     /**
-     * Defined by Zend_Filter_Interface
+     * Defined by Zend\Filter\Filter
      *
      * Decrypts the content $value with the defined settings
      *

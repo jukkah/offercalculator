@@ -16,8 +16,9 @@
  * @package    Zend_Feed_Reader
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Collection.php 24594 2012-01-05 21:27:01Z matthew $
  */
+
+namespace Zend\Feed\Reader;
 
 /**
  * @category   Zend
@@ -25,9 +26,9 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Feed_Reader_Collection extends ArrayObject
+class Collection extends \ArrayObject
 {
 
-
+    
 
 }

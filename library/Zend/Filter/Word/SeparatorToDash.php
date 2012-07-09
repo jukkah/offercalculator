@@ -16,13 +16,9 @@
  * @package    Zend_Filter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: SeparatorToDash.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Filter_SeperatorToSeparator
- */
-require_once 'Zend/Filter/Word/SeparatorToSeparator.php';
+namespace Zend\Filter\Word;
 
 /**
  * @category   Zend
@@ -30,17 +26,15 @@ require_once 'Zend/Filter/Word/SeparatorToSeparator.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Filter_Word_SeparatorToDash extends Zend_Filter_Word_SeparatorToSeparator
+class SeparatorToDash extends SeparatorToSeparator
 {
     /**
      * Constructor
      *
      * @param  string  $searchSeparator  Seperator to search for change
-     * @return void
      */
     public function __construct($searchSeparator = ' ')
     {
         parent::__construct($searchSeparator, '-');
     }
-
 }

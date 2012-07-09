@@ -16,13 +16,9 @@
  * @package    Zend_Markup
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: TokenList.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Markup_Token
- */
-require_once 'Zend/Markup/Token.php';
+namespace Zend\Markup;
 
 /**
  * @category   Zend
@@ -30,7 +26,7 @@ require_once 'Zend/Markup/Token.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Markup_TokenList implements RecursiveIterator
+class TokenList implements \RecursiveIterator
 {
 
     /**
@@ -43,7 +39,7 @@ class Zend_Markup_TokenList implements RecursiveIterator
     /**
      * Get the current token
      *
-     * @return Zend_Markup_Token
+     * @return \Zend\Markup\Token
      */
     public function current()
     {
@@ -53,7 +49,7 @@ class Zend_Markup_TokenList implements RecursiveIterator
     /**
      * Get the children of the current token
      *
-     * @return Zend_Markup_TokenList
+     * @return \Zend\Markup\TokenList
      */
     public function getChildren()
     {
@@ -63,11 +59,11 @@ class Zend_Markup_TokenList implements RecursiveIterator
     /**
      * Add a new child token
      *
-     * @param Zend_Markup_Token $child
+     * @param \Zend\Markup\Token $child
      *
      * @return void
      */
-    public function addChild(Zend_Markup_Token $child)
+    public function addChild(Token $child)
     {
         $this->_tokens[] = $child;
     }
@@ -95,7 +91,7 @@ class Zend_Markup_TokenList implements RecursiveIterator
     /**
      * Go to the next token
      *
-     * @return Zend_Markup_Token
+     * @return \Zend\Markup\Token
      */
     public function next()
     {
@@ -115,7 +111,7 @@ class Zend_Markup_TokenList implements RecursiveIterator
     /**
      * Check if the element is valid
      *
-     * @return void
+     * @return bool
      */
     public function valid()
     {

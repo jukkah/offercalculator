@@ -16,13 +16,11 @@
  * @package    Zend_Json
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Http.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Json_Server_Request
- */
-require_once 'Zend/Json/Server/Request.php';
+namespace Zend\Json\Server\Request;
+
+use Zend\Json\Server\Request as JsonRequest;
 
 /**
  * @category   Zend
@@ -30,7 +28,7 @@ require_once 'Zend/Json/Server/Request.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Json_Server_Request_Http extends Zend_Json_Server_Request
+class Http extends JsonRequest
 {
     /**
      * Raw JSON pulled from POST body

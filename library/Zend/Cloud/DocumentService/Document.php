@@ -17,6 +17,8 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+namespace Zend\Cloud\DocumentService;
+
 /**
  * Class encapsulating documents. Fields are stored in a name/value
  * array. Data are represented as strings.
@@ -29,8 +31,8 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Cloud_DocumentService_Document
-    implements ArrayAccess, IteratorAggregate, Countable
+class Document
+    implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     /** key in document denoting identifier */
     const KEY_FIELD = '_id';
@@ -48,7 +50,7 @@ class Zend_Cloud_DocumentService_Document
     protected $_fields;
 
     /**
-     * Construct an instance of Zend_Cloud_DocumentService_Document.
+     * Construct an instance of Zend\Cloud\DocumentService\Document.
      *
      * If no identifier is provided, but a field matching KEY_FIELD is present,
      * then that field's value will be used as the document identifier.
@@ -59,9 +61,8 @@ class Zend_Cloud_DocumentService_Document
      */
     public function __construct($fields, $id = null)
     {
-        if (!is_array($fields) && !$fields instanceof ArrayAccess) {
-            require_once 'Zend/Cloud/DocumentService/Exception.php';
-            throw new Zend_Cloud_DocumentService_Exception('Fields must be an array or implement ArrayAccess');
+        if (!is_array($fields) && !$fields instanceof \ArrayAccess) {
+            throw new Exception\InvalidArgumentException('Fields must be an array or implement ArrayAccess');
         }
 
         if (isset($fields[self::KEY_FIELD])) {
@@ -77,7 +78,7 @@ class Zend_Cloud_DocumentService_Document
      * Set document identifier
      *
      * @param  mixed $id
-     * @return Zend_Cloud_DocumentService_Document
+     * @return \Zend\Cloud\DocumentService\Document
      */
     public function setId($id)
     {
@@ -124,7 +125,7 @@ class Zend_Cloud_DocumentService_Document
      *
      * @param  string $name
      * @param  mixed $value
-     * @return Zend_Cloud_DocumentService_Document
+     * @return \Zend\Cloud\DocumentService\Document
      */
     public function setField($name, $value)
     {
@@ -222,8 +223,7 @@ class Zend_Cloud_DocumentService_Document
             return $this->setField($option, $args[0]);
         }
 
-        require_once 'Zend/Cloud/OperationNotAvailableException.php';
-        throw new Zend_Cloud_OperationNotAvailableException("Unknown operation $name");
+        throw new Exception\OperationNotAvailableException("Unknown operation $name");
     }
 
     /**
@@ -239,10 +239,10 @@ class Zend_Cloud_DocumentService_Document
     /**
      * IteratorAggregate: return iterator for iterating over fields
      *
-     * @return Iterator
+     * @return \Iterator
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->_fields);
+        return new \ArrayIterator($this->_fields);
     }
 }

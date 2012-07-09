@@ -16,12 +16,10 @@
  * @package    Zend_View
  * @subpackage Helper
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: DeclareVars.php 24594 2012-01-05 21:27:01Z matthew $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_View_Helper_Abstract.php */
-require_once 'Zend/View/Helper/Abstract.php';
+namespace Zend\View\Helper;
 
 /**
  * Helper for declaring default values of template variables
@@ -31,11 +29,11 @@ require_once 'Zend/View/Helper/Abstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_DeclareVars extends Zend_View_Helper_Abstract
+class DeclareVars extends AbstractHelper
 {
     /**
      * The view object that created this helper object.
-     * @var Zend_View
+     * @var \Zend\View\View
      */
     public $view;
 
@@ -63,15 +61,16 @@ class Zend_View_Helper_DeclareVars extends Zend_View_Helper_Abstract
      * @param string|array variable number of arguments, all string names of variables to test
      * @return void
      */
-    public function declareVars()
+    public function __invoke()
     {
+        $view = $this->getView();
         $args = func_get_args();
         foreach($args as $key) {
             if (is_array($key)) {
                 foreach ($key as $name => $value) {
                     $this->_declareVar($name, $value);
                 }
-            } else if (!isset($view->$key)) {
+            } else if (!isset($view->vars()->$key)) {
                 $this->_declareVar($key);
             }
         }
@@ -88,8 +87,10 @@ class Zend_View_Helper_DeclareVars extends Zend_View_Helper_Abstract
      */
     protected function _declareVar($key, $value = '')
     {
-        if (!isset($this->view->$key)) {
-            $this->view->$key = $value;
+        $view = $this->getView();
+        $vars = $view->vars();
+        if (!isset($vars->$key)) {
+            $vars->$key = $value;
         }
     }
 }

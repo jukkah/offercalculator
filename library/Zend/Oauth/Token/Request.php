@@ -13,38 +13,40 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Request.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** Zend_Oauth_Token */
-require_once 'Zend/Oauth/Token.php';
+namespace Zend\OAuth\Token;
+
+use Zend\Http\Response as HTTPResponse;
+use Zend\OAuth\Http\Utility as HTTPUtility;
+use Zend\OAuth\Client;
 
 /**
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Oauth_Token_Request extends Zend_Oauth_Token
+class Request extends AbstractToken
 {
     /**
      * Constructor
      *
-     * @param null|Zend_Http_Response $response
-     * @param null|Zend_Oauth_Http_Utility $utility
+     * @param null|Zend\Http\Response $response
+     * @param null|Zend\OAuth\Http\Utility $utility
      */
     public function __construct(
-        Zend_Http_Response $response = null,
-        Zend_Oauth_Http_Utility $utility = null
+        HTTPResponse $response = null,
+        HTTPUtility $utility = null
     ) {
         parent::__construct($response, $utility);
 
         // detect if server supports OAuth 1.0a
-        if (isset($this->_params[Zend_Oauth_Token::TOKEN_PARAM_CALLBACK_CONFIRMED])) {
-            Zend_Oauth_Client::$supportsRevisionA = true;
+        if (isset($this->_params[AbstractToken::TOKEN_PARAM_CALLBACK_CONFIRMED])) {
+            Client::$supportsRevisionA = true;
         }
     }
 }

@@ -17,18 +17,9 @@
  * @subpackage Object
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Ean2.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Barcode_Object_Ean5
- */
-require_once 'Zend/Barcode/Object/Ean5.php';
-
-/**
- * @see Zend_Validate_Barcode
- */
-require_once 'Zend/Validate/Barcode.php';
+namespace Zend\Barcode\Object;
 
 /**
  * Class for generate Ean2 barcode
@@ -38,10 +29,10 @@ require_once 'Zend/Validate/Barcode.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Barcode_Object_Ean2 extends Zend_Barcode_Object_Ean5
+class Ean2 extends Ean5
 {
 
-    protected $_parities = array(
+    protected $parities = array(
         0 => array('A','A'),
         1 => array('A','B'),
         2 => array('B','A'),
@@ -52,14 +43,14 @@ class Zend_Barcode_Object_Ean2 extends Zend_Barcode_Object_Ean5
      * Default options for Ean2 barcode
      * @return void
      */
-    protected function _getDefaultOptions()
+    protected function getDefaultOptions()
     {
-        $this->_barcodeLength = 2;
+        $this->barcodeLength = 2;
     }
 
-    protected function _getParity($i)
+    protected function getParity($i)
     {
         $modulo = $this->getText() % 4;
-        return $this->_parities[$modulo][$i];
+        return $this->parities[$modulo][$i];
     }
 }

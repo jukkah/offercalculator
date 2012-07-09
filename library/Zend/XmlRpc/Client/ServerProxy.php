@@ -17,9 +17,11 @@
  * @subpackage Client
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: ServerProxy.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
+namespace Zend\XmlRpc\Client;
+
+use Zend\XmlRpc\Client as XMLRPCClient;
 
 /**
  * The namespace decorator enables object chaining to permit
@@ -32,10 +34,10 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_XmlRpc_Client_ServerProxy
+class ServerProxy
 {
     /**
-     * @var Zend_XmlRpc_Client
+     * @var \Zend\XmlRpc\Client
      */
     private $_client = null;
 
@@ -46,7 +48,7 @@ class Zend_XmlRpc_Client_ServerProxy
 
 
     /**
-     * @var array of Zend_XmlRpc_Client_ServerProxy
+     * @var array of \Zend\XmlRpc\Client\ServerProxy
      */
     private $_cache = array();
 
@@ -54,13 +56,13 @@ class Zend_XmlRpc_Client_ServerProxy
     /**
      * Class constructor
      *
+     * @param \Zend\XmlRpc\Client $client
      * @param string             $namespace
-     * @param Zend_XmlRpc_Client $client
      */
-    public function __construct($client, $namespace = '')
+    public function __construct(XMLRPCClient $client, $namespace = '')
     {
-        $this->_namespace = $namespace;
         $this->_client    = $client;
+        $this->_namespace = $namespace;
     }
 
 
@@ -68,7 +70,7 @@ class Zend_XmlRpc_Client_ServerProxy
      * Get the next successive namespace
      *
      * @param string $name
-     * @return Zend_XmlRpc_Client_ServerProxy
+     * @return \Zend\XmlRpc\Client\ServerProxy
      */
     public function __get($namespace)
     {
@@ -89,7 +91,7 @@ class Zend_XmlRpc_Client_ServerProxy
      */
     public function __call($method, $args)
     {
-        $method = ltrim("$this->_namespace.$method", '.');
+        $method = ltrim("{$this->_namespace}.{$method}", '.');
         return $this->_client->call($method, $args);
     }
 }

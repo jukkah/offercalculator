@@ -17,12 +17,15 @@
  * @subpackage Technorati
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Utils.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
+namespace Zend\Service\Technorati;
+
+use DateTime;
+use Zend\Uri;
 
 /**
- * Collection of utilities for various Zend_Service_Technorati classes.
+ * Collection of utilities for various Zend\Service\Technorati classes.
  *
  * @category   Zend
  * @package    Zend_Service
@@ -30,15 +33,15 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Technorati_Utils
+class Utils
 {
     /**
-     * Parses, validates and returns a valid Zend_Uri object
+     * Parses, validates and returns a valid Zend\Uri object
      * from given $input.
      *
-     * @param   string|Zend_Uri_Http $input
-     * @return  null|Zend_Uri_Http
-     * @throws  Zend_Service_Technorati_Exception
+     * @param   string|Uri\Http $input
+     * @return  null|Uri\Http
+     * @throws  Exception\RuntimeException
      * @static
      */
     public static function normalizeUriHttp($input)
@@ -48,78 +51,71 @@ class Zend_Service_Technorati_Utils
             return null;
         }
 
-        /**
-         * @see Zend_Uri
-         */
-        require_once 'Zend/Uri.php';
-        if ($input instanceof Zend_Uri_Http) {
-            $uri = $input;
-        } else {
+        $uri = $input;
+
+        // Try to cast
+        if (!$input instanceof Uri\Http) {
             try {
-                $uri = Zend_Uri::factory((string) $input);
-            }
-            // wrap exception under Zend_Service_Technorati_Exception object
-            catch (Exception $e) {
-                /**
-                 * @see Zend_Service_Technorati_Exception
-                 */
-                require_once 'Zend/Service/Technorati/Exception.php';
-                throw new Zend_Service_Technorati_Exception($e->getMessage(), 0, $e);
+                $uri = Uri\UriFactory::factory((string) $input);
+            } catch (\Exception $e) {
+                // wrap exception under Exception object
+                throw new Exception\RuntimeException($e->getMessage(), 0, $e);
             }
         }
 
-        // allow inly Zend_Uri_Http objects or child classes
-        if (!($uri instanceof Zend_Uri_Http)) {
-            /**
-             * @see Zend_Service_Technorati_Exception
-             */
-            require_once 'Zend/Service/Technorati/Exception.php';
-            throw new Zend_Service_Technorati_Exception(
-                "Invalid URL $uri, only HTTP(S) protocols can be used");
+        // allow only Zend\Uri\Http objects or child classes (not other URI formats)
+        if (!$uri instanceof Uri\Http) {
+            throw new Exception\RuntimeException(sprintf(
+                "%s: Invalid URL %s, only HTTP(S) protocols can be used",
+                __METHOD__,
+                $uri
+            ));
+        }
+
+        // Validate the URI
+        if (!$uri->isValid()) {
+            $caller = function () { 
+                $traces = debug_backtrace(); 
+
+                if (isset($traces[2])) 
+                { 
+                    return $traces[2]['function']; 
+                } 
+
+                return null; 
+            };
+            throw new Exception\RuntimeException(sprintf(
+                '%s (called by %s): invalid URI ("%s") provided',
+                __METHOD__,
+                $caller(),
+                (string) $input
+            ));
         }
 
         return $uri;
     }
+
     /**
-     * Parses, validates and returns a valid Zend_Date object
+     * Parses, validates and returns a valid DateTime object
      * from given $input.
      *
-     * $input can be either a string, an integer or a Zend_Date object.
-     * If $input is string or int, it will be provided to Zend_Date as it is.
-     * If $input is a Zend_Date object, the object instance will be returned.
+     * $input can be either a string, an integer or a DateTime object.
+     * If $input is string or int, it will be provided to DateTime as it is.
+     * If $input is a DateTime object, the object instance will be returned.
      *
-     * @param   mixed|Zend_Date $input
-     * @return  null|Zend_Date
-     * @throws  Zend_Service_Technorati_Exception
+     * @param   mixed|DateTime $input
+     * @return  DateTime
+     * @throws  \Exception
      * @static
      */
     public static function normalizeDate($input)
     {
-        /**
-         * @see Zend_Date
-         */
-        require_once 'Zend/Date.php';
-        /**
-         * @see Zend_Locale
-         */
-        require_once 'Zend/Locale.php';
-
-        // allow null as value and return valid Zend_Date objects
-        if (($input === null) || ($input instanceof Zend_Date)) {
+        // allow null as value and return valid DateTime objects
+        if (($input === null) || ($input instanceof DateTime)) {
             return $input;
         }
 
-        // due to a BC break as of ZF 1.5 it's not safe to use Zend_Date::isDate() here
-        // see ZF-2524, ZF-2334
-        if (@strtotime($input) !== FALSE) {
-            return new Zend_Date($input);
-        } else {
-            /**
-             * @see Zend_Service_Technorati_Exception
-             */
-            require_once 'Zend/Service/Technorati/Exception.php';
-            throw new Zend_Service_Technorati_Exception("'$input' is not a valid Date/Time");
-        }
+        return new DateTime($input);
     }
 
     /**

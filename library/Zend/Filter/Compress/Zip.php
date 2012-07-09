@@ -16,13 +16,12 @@
  * @package    Zend_Filter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Zip.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Filter_Compress_CompressAbstract
- */
-require_once 'Zend/Filter/Compress/CompressAbstract.php';
+namespace Zend\Filter\Compress;
+
+use Zend\Filter\Exception;
+use ZipArchive;
 
 /**
  * Compression adapter for zip
@@ -32,7 +31,7 @@ require_once 'Zend/Filter/Compress/CompressAbstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
+class Zip extends AbstractCompressionAlgorithm
 {
     /**
      * Compression Options
@@ -44,7 +43,7 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
      *
      * @var array
      */
-    protected $_options = array(
+    protected $options = array(
         'archive' => null,
         'target'  => null,
     );
@@ -52,13 +51,13 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
     /**
      * Class constructor
      *
-     * @param string|array $options (Optional) Options to set
+     * @param  null|array|\Traversable $options (Optional) Options to set
+     * @return void
      */
     public function __construct($options = null)
     {
         if (!extension_loaded('zip')) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception('This filter needs the zip extension');
+            throw new Exception\ExtensionNotLoadedException('This filter needs the zip extension');
         }
         parent::__construct($options);
     }
@@ -70,19 +69,19 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
      */
     public function getArchive()
     {
-        return $this->_options['archive'];
+        return $this->options['archive'];
     }
 
     /**
      * Sets the archive to use for de-/compression
      *
-     * @param string $archive Archive to use
-     * @return Zend_Filter_Compress_Rar
+     * @param  string $archive Archive to use
+     * @return Zip
      */
     public function setArchive($archive)
     {
-        $archive = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $archive);
-        $this->_options['archive'] = (string) $archive;
+        $archive = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, (string) $archive);
+        $this->options['archive'] = $archive;
 
         return $this;
     }
@@ -94,24 +93,23 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
      */
     public function getTarget()
     {
-        return $this->_options['target'];
+        return $this->options['target'];
     }
 
     /**
      * Sets the target to use
      *
-     * @param string $target
-     * @return Zend_Filter_Compress_Rar
+     * @param  string $target
+     * @return Zip
      */
     public function setTarget($target)
     {
         if (!file_exists(dirname($target))) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception("The directory '$target' does not exist");
+            throw new Exception\InvalidArgumentException("The directory '$target' does not exist");
         }
 
-        $target = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $target);
-        $this->_options['target'] = (string) $target;
+        $target = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, (string) $target);
+        $this->options['target'] = $target;
         return $this;
     }
 
@@ -120,6 +118,7 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
      *
      * @param  string $content
      * @return string Compressed archive
+     * @throws Exception\RuntimeException if unable to open zip archive, or error during compresion
      */
     public function compress($content)
     {
@@ -127,8 +126,7 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
         $res = $zip->open($this->getArchive(), ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
         if ($res !== true) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception($this->_errorString($res));
+            throw new Exception\RuntimeException($this->errorString($res));
         }
 
         if (file_exists($content)) {
@@ -163,16 +161,14 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
                     foreach ($files as $file) {
                         $zip->addFile($current . $file, $local . $file);
                         if ($res !== true) {
-                            require_once 'Zend/Filter/Exception.php';
-                            throw new Zend_Filter_Exception($this->_errorString($res));
+                            throw new Exception\RuntimeException($this->errorString($res));
                         }
                     }
                 }
             } else {
                 $res = $zip->addFile($content, $basename);
                 if ($res !== true) {
-                    require_once 'Zend/Filter/Exception.php';
-                    throw new Zend_Filter_Exception($this->_errorString($res));
+                    throw new Exception\RuntimeException($this->errorString($res));
                 }
             }
         } else {
@@ -185,13 +181,12 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
 
             $res = $zip->addFromString($file, $content);
             if ($res !== true) {
-                require_once 'Zend/Filter/Exception.php';
-                throw new Zend_Filter_Exception($this->_errorString($res));
+                throw new Exception\RuntimeException($this->errorString($res));
             }
         }
 
         $zip->close();
-        return $this->_options['archive'];
+        return $this->options['archive'];
     }
 
     /**
@@ -199,22 +194,22 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
      *
      * @param  string $content
      * @return string
+     * @throws Exception\RuntimeException If archive file not found, target directory not found, 
+     *                                    or error during decompression
      */
     public function decompress($content)
     {
         $archive = $this->getArchive();
-        if (file_exists($content)) {
-            $archive = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, realpath($content));
-        } elseif (empty($archive) || !file_exists($archive)) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception('ZIP Archive not found');
+
+        if (empty($archive) || !file_exists($archive)) {
+            throw new Exception\RuntimeException('ZIP Archive not found');
         }
 
-        $zip = new ZipArchive();
-        $res = $zip->open($archive);
+        $archive = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, realpath($content));
+        $zip     = new ZipArchive();
+        $res     = $zip->open($archive);
 
         $target = $this->getTarget();
-
         if (!empty($target) && !is_dir($target)) {
             $target = dirname($target);
         }
@@ -224,37 +219,16 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
         }
 
         if (empty($target) || !is_dir($target)) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception('No target for ZIP decompression set');
+            throw new Exception\RuntimeException('No target for ZIP decompression set');
         }
 
         if ($res !== true) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception($this->_errorString($res));
+            throw new Exception\RuntimeException($this->errorString($res));
         }
 
-        if (version_compare(PHP_VERSION, '5.2.8', '<')) {
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $statIndex = $zip->statIndex($i);
-                $currName = $statIndex['name'];
-                if (($currName{0} == '/') ||
-                    (substr($currName, 0, 2) == '..') ||
-                    (substr($currName, 0, 4) == './..')
-                    )
-                {
-                    require_once 'Zend/Filter/Exception.php';
-                    throw new Zend_Filter_Exception('Upward directory traversal was detected inside ' . $archive
-                        . ' please use PHP 5.2.8 or greater to take advantage of path resolution features of '
-                        . 'the zip extension in this decompress() method.'
-                        );
-                }
-            }
-        }
-
-        $res = @$zip->extractTo($target);
+        $res = $zip->extractTo($target);
         if ($res !== true) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception($this->_errorString($res));
+            throw new Exception\RuntimeException($this->errorString($res));
         }
 
         $zip->close();
@@ -264,9 +238,10 @@ class Zend_Filter_Compress_Zip extends Zend_Filter_Compress_CompressAbstract
     /**
      * Returns the proper string based on the given error constant
      *
-     * @param string $error
+     * @param  string $error
+     * @return string
      */
-    protected function _errorString($error)
+    public function errorString($error)
     {
         switch($error) {
             case ZipArchive::ER_MULTIDISK :

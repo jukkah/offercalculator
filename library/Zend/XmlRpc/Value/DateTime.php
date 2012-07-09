@@ -17,15 +17,10 @@
  * @subpackage Value
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: DateTime.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-
-/**
- * Zend_XmlRpc_Value_Scalar
- */
-require_once 'Zend/XmlRpc/Value/Scalar.php';
-
+namespace Zend\XmlRpc\Value;
+use Zend\XmlRpc\Exception;
 
 /**
  * @category   Zend
@@ -34,7 +29,7 @@ require_once 'Zend/XmlRpc/Value/Scalar.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_XmlRpc_Value_DateTime extends Zend_XmlRpc_Value_Scalar
+class DateTime extends AbstractScalar
 {
     /**
      * PHP compatible format string for XML/RPC datetime values
@@ -62,20 +57,18 @@ class Zend_XmlRpc_Value_DateTime extends Zend_XmlRpc_Value_Scalar
     {
         $this->_type = self::XMLRPC_TYPE_DATETIME;
 
-        if ($value instanceof Zend_Date) {
-            $this->_value = $value->toString($this->_isoFormatString);
-        } elseif ($value instanceof DateTime) {
+        if ($value instanceof \DateTime) {
             $this->_value = $value->format($this->_phpFormatString);
         } elseif (is_numeric($value)) { // The value is numeric, we make sure it is an integer
             $this->_value = date($this->_phpFormatString, (int)$value);
         } else {
-            $timestamp = new DateTime($value);
-            if ($timestamp === false) { // cannot convert the value to a timestamp
-                require_once 'Zend/XmlRpc/Value/Exception.php';
-                throw new Zend_XmlRpc_Value_Exception('Cannot convert given value \''. $value .'\' to a timestamp');
+            try {
+                $dateTime = new \DateTime($value);
+            } catch (\Exception $e) {
+                throw new Exception\ValueException($e->getMessage(), $e->getCode(), $e);
             }
 
-            $this->_value = $timestamp->format($this->_phpFormatString); // Convert the timestamp to iso8601 format
+            $this->_value = $dateTime->format($this->_phpFormatString); // Convert the DateTime to iso8601 format
         }
     }
 

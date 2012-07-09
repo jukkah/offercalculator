@@ -17,18 +17,13 @@
  * @subpackage Zend_InfoCard_Xml
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Saml.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * Zend_InfoCard_Xml_Element
- */
-require_once 'Zend/InfoCard/Xml/Element.php';
+namespace Zend\InfoCard\XML\Assertion;
 
-/**
- * Zend_InfoCard_Xml_Assertion_Interface
- */
-require_once 'Zend/InfoCard/Xml/Assertion/Interface.php';
+use Zend\InfoCard\XML\Assertion as XMLAssertion;
+use Zend\InfoCard\XML\AbstractElement;
+use Zend\InfoCard\XML\Exception;
 
 /**
  * A Xml Assertion Document in SAML Token format
@@ -39,9 +34,7 @@ require_once 'Zend/InfoCard/Xml/Assertion/Interface.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_InfoCard_Xml_Assertion_Saml
-    extends Zend_InfoCard_Xml_Element
-    implements Zend_InfoCard_Xml_Assertion_Interface
+class SAML extends AbstractElement implements AssertionInterface
 {
 
     /**
@@ -142,7 +135,7 @@ class Zend_InfoCard_Xml_Assertion_Saml
      */
     public function getAssertionURI()
     {
-        return Zend_InfoCard_Xml_Assertion::TYPE_SAML;
+        return XMLAssertion\Factory::TYPE_SAML;
     }
 
     /**
@@ -198,7 +191,7 @@ class Zend_InfoCard_Xml_Assertion_Saml
     /**
      * Return an array of conditions which the assertions are predicated on
      *
-     * @throws Zend_InfoCard_Xml_Exception
+     * @throws Exception\RuntimeException
      * @return array an array of conditions
      */
     public function getConditions()
@@ -206,8 +199,8 @@ class Zend_InfoCard_Xml_Assertion_Saml
 
         list($conditions) = $this->xpath("//saml:Conditions");
 
-        if(!($conditions instanceof Zend_InfoCard_Xml_Element)) {
-            throw new Zend_InfoCard_Xml_Exception("Unable to find the saml:Conditions block");
+        if(!($conditions instanceof AbstractElement)) {
+            throw new Exception\RuntimeException("Unable to find the saml:Conditions block");
         }
 
         $retval = array();
@@ -243,7 +236,7 @@ class Zend_InfoCard_Xml_Assertion_Saml
          */
 
         if($this->getConfirmationMethod() == self::CONFIRMATION_BEARER) {
-            throw new Zend_InfoCard_Xml_Exception("Cannot get Subject Key Info when Confirmation Method was Bearer");
+            throw new Exception\RuntimeException("Cannot get Subject Key Info when Confirmation Method was Bearer");
         }
     }
 

@@ -17,9 +17,12 @@
  * @subpackage Technorati
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: GetInfoResult.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
+namespace Zend\Service\Technorati;
+
+use DomDocument;
+use DOMXPath;
 
 /**
  * Represents a single Technorati GetInfo query result object.
@@ -30,15 +33,15 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Technorati_GetInfoResult
+class GetInfoResult
 {
     /**
      * Technorati author
      *
-     * @var     Zend_Service_Technorati_Author
+     * @var     Author
      * @access  protected
      */
-    protected $_author;
+    protected $author;
 
     /**
      * A list of weblogs claimed by this author
@@ -46,7 +49,7 @@ class Zend_Service_Technorati_GetInfoResult
      * @var     array
      * @access  protected
      */
-    protected $_weblogs = array();
+    protected $weblogs = array();
 
 
     /**
@@ -58,25 +61,15 @@ class Zend_Service_Technorati_GetInfoResult
     {
         $xpath = new DOMXPath($dom);
 
-        /**
-         * @see Zend_Service_Technorati_Author
-         */
-        require_once 'Zend/Service/Technorati/Author.php';
-
         $result = $xpath->query('//result');
         if ($result->length == 1) {
-            $this->_author = new Zend_Service_Technorati_Author($result->item(0));
+            $this->author = new Author($result->item(0));
         }
-
-        /**
-         * @see Zend_Service_Technorati_Weblog
-         */
-        require_once 'Zend/Service/Technorati/Weblog.php';
 
         $result = $xpath->query('//item/weblog');
         if ($result->length >= 1) {
             foreach ($result as $weblog) {
-                $this->_weblogs[] = new Zend_Service_Technorati_Weblog($weblog);
+                $this->weblogs[] = new Weblog($weblog);
             }
         }
     }
@@ -85,19 +78,21 @@ class Zend_Service_Technorati_GetInfoResult
     /**
      * Returns the author associated with queried username.
      *
-     * @return  Zend_Service_Technorati_Author
+     * @return  Author
      */
-    public function getAuthor() {
-        return $this->_author;
+    public function getAuthor()
+    {
+        return $this->author;
     }
 
     /**
      * Returns the collection of weblogs authored by queried username.
      *
-     * @return  array of Zend_Service_Technorati_Weblog
+     * @return  array of Weblog
      */
-    public function getWeblogs() {
-        return $this->_weblogs;
+    public function getWeblogs()
+    {
+        return $this->weblogs;
     }
 
 }

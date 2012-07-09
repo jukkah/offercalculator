@@ -17,11 +17,11 @@
  * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: PhpCode.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** @see Zend_Serializer_Adapter_AdapterAbstract */
-require_once 'Zend/Serializer/Adapter/AdapterAbstract.php';
+namespace Zend\Serializer\Adapter;
+
+use Zend\Serializer\Exception\RuntimeException;
 
 /**
  * @category   Zend
@@ -30,13 +30,13 @@ require_once 'Zend/Serializer/Adapter/AdapterAbstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Serializer_Adapter_PhpCode extends Zend_Serializer_Adapter_AdapterAbstract
+class PhpCode extends AbstractAdapter
 {
     /**
      * Serialize PHP using var_export
-     *
-     * @param  mixed $value
-     * @param  array $opts
+     * 
+     * @param  mixed $value 
+     * @param  array $opts 
      * @return string
      */
     public function serialize($value, array $opts = array())
@@ -48,19 +48,18 @@ class Zend_Serializer_Adapter_PhpCode extends Zend_Serializer_Adapter_AdapterAbs
      * Deserialize PHP string
      *
      * Warning: this uses eval(), and should likely be avoided.
-     *
-     * @param  string $code
-     * @param  array $opts
+     * 
+     * @param  string $code 
+     * @param  array $opts 
      * @return mixed
-     * @throws Zend_Serializer_Exception on eval error
+     * @throws RuntimeException on eval error
      */
     public function unserialize($code, array $opts = array())
     {
         $eval = @eval('$ret=' . $code . ';');
         if ($eval === false) {
-                $lastErr = error_get_last();
-                require_once 'Zend/Serializer/Exception.php';
-                throw new Zend_Serializer_Exception('eval failed: ' . $lastErr['message']);
+            $lastErr = error_get_last();
+            throw new RuntimeException('eval failed: ' . $lastErr['message']);
         }
         return $ret;
     }

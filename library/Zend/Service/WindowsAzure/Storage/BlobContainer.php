@@ -17,32 +17,25 @@
  * @subpackage Storage
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: BlobContainer.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Service_WindowsAzure_Exception
- */
-require_once 'Zend/Service/WindowsAzure/Exception.php';
+namespace Zend\Service\WindowsAzure\Storage;
+
+use Zend\Service\WindowsAzure\Exception\UnknownPropertyException;
 
 /**
- * @see Zend_Service_WindowsAzure_Storage_StorageEntityAbstract
- */
-require_once 'Zend/Service/WindowsAzure/Storage/StorageEntityAbstract.php';
-
-/**
- * @category   Zend
- * @package    Zend_Service_WindowsAzure
- * @subpackage Storage
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @category                       Zend
+ * @package                        Zend_Service_WindowsAzure
+ * @subpackage                     Storage
+ * @copyright                      Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license                        http://framework.zend.com/license/new-bsd     New BSD License
  *
  * @property string $Name          Name of the container
  * @property string $Etag          Etag of the container
  * @property string $LastModified  Last modified date of the container
  * @property array  $Metadata      Key/value pairs of meta data
  */
-class Zend_Service_WindowsAzure_Storage_BlobContainer
+class BlobContainer
 {
     /**
      * Data
@@ -74,26 +67,32 @@ class Zend_Service_WindowsAzure_Storage_BlobContainer
      *
      * @param string $name     Name of the property
      * @param string $value    Value to set
+     * @throws UnknownPropertyException
+     * @return
      */
-    public function __set($name, $value) {
+    public function __set($name, $value)
+    {
         if (array_key_exists(strtolower($name), $this->_data)) {
             $this->_data[strtolower($name)] = $value;
             return;
         }
 
-        throw new Exception("Unknown property: " . $name);
+        throw new UnknownPropertyException('Unknown property: ' . $name);
     }
 
     /**
      * Magic overload for getting properties
      *
      * @param string $name     Name of the property
+     * @throws UnknownPropertyException
+     * @return
      */
-    public function __get($name) {
+    public function __get($name)
+    {
         if (array_key_exists(strtolower($name), $this->_data)) {
             return $this->_data[strtolower($name)];
         }
 
-        throw new Exception("Unknown property: " . $name);
+        throw new UnknownPropertyException('Unknown property: ' . $name);
     }
 }

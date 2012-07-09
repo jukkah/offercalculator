@@ -14,18 +14,11 @@
  * @package    Zend_ProgressBar
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: JsPull.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Json
- */
-require_once 'Zend/Json.php';
+namespace Zend\ProgressBar\Adapter;
 
-/**
- * @see Zend_ProgressBar_Adapter
- */
-require_once 'Zend/ProgressBar/Adapter.php';
+use Zend\Json\Json;
 
 /**
  * Zend_ProgressBar_Adapter_JsPull offers a simple method for updating a
@@ -33,11 +26,10 @@ require_once 'Zend/ProgressBar/Adapter.php';
  *
  * @category  Zend
  * @package   Zend_ProgressBar
- * @uses      Zend_ProgressBar_Adapter_Interface
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_ProgressBar_Adapter_JsPull extends Zend_ProgressBar_Adapter
+class JsPull extends AbstractAdapter
 {
     /**
      * Wether to exit after json data send or not
@@ -50,7 +42,7 @@ class Zend_ProgressBar_Adapter_JsPull extends Zend_ProgressBar_Adapter
      * Set wether to exit after json data send or not
      *
      * @param  boolean $exitAfterSend
-     * @return Zend_ProgressBar_Adapter_JsPull
+     * @return \Zend\ProgressBar\Adapter\JsPull
      */
     public function setExitAfterSend($exitAfterSend)
     {
@@ -58,7 +50,7 @@ class Zend_ProgressBar_Adapter_JsPull extends Zend_ProgressBar_Adapter
     }
 
     /**
-     * Defined by Zend_ProgressBar_Adapter_Interface
+     * Defined by Zend\ProgressBar\Adapter\AbstractAdapter
      *
      * @param  float   $current       Current progress value
      * @param  float   $max           Max progress value
@@ -80,20 +72,20 @@ class Zend_ProgressBar_Adapter_JsPull extends Zend_ProgressBar_Adapter
             'finished'      => false
         );
 
-        $data = Zend_Json::encode($arguments);
+        $data = Json::encode($arguments);
 
         // Output the data
         $this->_outputData($data);
     }
 
     /**
-     * Defined by Zend_ProgressBar_Adapter_Interface
+     * Defined by Zend\ProgressBar\Adapter\AbstractAdapter
      *
      * @return void
      */
     public function finish()
     {
-        $data = Zend_Json::encode(array('finished' => true));
+        $data = Json::encode(array('finished' => true));
 
         $this->_outputData($data);
     }

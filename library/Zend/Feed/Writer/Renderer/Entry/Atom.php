@@ -16,33 +16,32 @@
  * @package    Zend_Feed_Writer
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Atom.php 24594 2012-01-05 21:27:01Z matthew $
  */
+
+namespace Zend\Feed\Writer\Renderer\Entry;
+
+use DateTime;
+use DOMDocument;
+use DOMElement;
+use Zend\Feed\Writer;
+use Zend\Feed\Writer\Renderer;
+use Zend\Uri;
+use Zend\Validator;
 
 /**
- * @see Zend_Feed_Writer_Renderer_RendererAbstract
+ * @category Zend
+ * @package Zend_Feed_Writer
+ * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license http://framework.zend.com/license/new-bsd New BSD License
  */
-require_once 'Zend/Feed/Writer/Renderer/RendererAbstract.php';
-
-require_once 'Zend/Feed/Writer/Renderer/Feed/Atom/Source.php';
-
-/**
- * @category   Zend
- * @package    Zend_Feed_Writer
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
- */
-class Zend_Feed_Writer_Renderer_Entry_Atom
-    extends Zend_Feed_Writer_Renderer_RendererAbstract
-    implements Zend_Feed_Writer_Renderer_RendererInterface
+class Atom extends Renderer\AbstractRenderer implements Renderer\RendererInterface
 {
     /**
      * Constructor
      *
-     * @param  Zend_Feed_Writer_Entry $container
-     * @return void
+     * @param  Writer\Entry $container
      */
-    public function __construct (Zend_Feed_Writer_Entry $container)
+    public function __construct (Writer\Entry $container)
     {
         parent::__construct($container);
     }
@@ -50,13 +49,13 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
     /**
      * Render atom entry
      *
-     * @return Zend_Feed_Writer_Renderer_Entry_Atom
+     * @return Atom
      */
     public function render()
     {
         $this->_dom = new DOMDocument('1.0', $this->_container->getEncoding());
         $this->_dom->formatOutput = true;
-        $entry = $this->_dom->createElementNS(Zend_Feed_Writer::NAMESPACE_ATOM_10, 'entry');
+        $entry = $this->_dom->createElementNS(Writer\Writer::NAMESPACE_ATOM_10, 'entry');
         $this->_dom->appendChild($entry);
 
         $this->_setSource($this->_dom, $entry);
@@ -74,7 +73,7 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
         foreach ($this->_extensions as $ext) {
             $ext->setType($this->getType());
             $ext->setRootElement($this->getRootElement());
-            $ext->setDomDocument($this->getDomDocument(), $entry);
+            $ext->setDOMDocument($this->getDOMDocument(), $entry);
             $ext->render();
         }
 
@@ -87,14 +86,14 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
      * @param  DOMDocument $dom
      * @param  DOMElement $root
      * @return void
+     * @throws Writer\Exception\InvalidArgumentException
      */
     protected function _setTitle(DOMDocument $dom, DOMElement $root)
     {
         if(!$this->getDataContainer()->getTitle()) {
-            require_once 'Zend/Feed/Exception.php';
             $message = 'Atom 1.0 entry elements MUST contain exactly one'
             . ' atom:title element but a title has not been set';
-            $exception = new Zend_Feed_Exception($message);
+            $exception = new Writer\Exception\InvalidArgumentException($message);
             if (!$this->_ignoreExceptions) {
                 throw $exception;
             } else {
@@ -136,14 +135,14 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
      * @param  DOMDocument $dom
      * @param  DOMElement $root
      * @return void
+     * @throws Writer\Exception\InvalidArgumentException
      */
     protected function _setDateModified(DOMDocument $dom, DOMElement $root)
     {
         if(!$this->getDataContainer()->getDateModified()) {
-            require_once 'Zend/Feed/Exception.php';
             $message = 'Atom 1.0 entry elements MUST contain exactly one'
             . ' atom:updated element but a modification date has not been set';
-            $exception = new Zend_Feed_Exception($message);
+            $exception = new Writer\Exception\InvalidArgumentException($message);
             if (!$this->_ignoreExceptions) {
                 throw $exception;
             } else {
@@ -155,7 +154,7 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
         $updated = $dom->createElement('updated');
         $root->appendChild($updated);
         $text = $dom->createTextNode(
-            $this->getDataContainer()->getDateModified()->get(Zend_Date::ISO_8601)
+            $this->getDataContainer()->getDateModified()->format(DateTime::ISO8601)
         );
         $updated->appendChild($text);
     }
@@ -175,7 +174,7 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
         $el = $dom->createElement('published');
         $root->appendChild($el);
         $text = $dom->createTextNode(
-            $this->getDataContainer()->getDateCreated()->get(Zend_Date::ISO_8601)
+            $this->getDataContainer()->getDateCreated()->format(DateTime::ISO8601)
         );
         $el->appendChild($text);
     }
@@ -262,17 +261,17 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
      * @param  DOMDocument $dom
      * @param  DOMElement $root
      * @return void
+     * @throws Writer\Exception\InvalidArgumentException
      */
     protected function _setId(DOMDocument $dom, DOMElement $root)
     {
         if(!$this->getDataContainer()->getId()
         && !$this->getDataContainer()->getLink()) {
-            require_once 'Zend/Feed/Exception.php';
             $message = 'Atom 1.0 entry elements MUST contain exactly one '
             . 'atom:id element, or as an alternative, we can use the same '
             . 'value as atom:link however neither a suitable link nor an '
             . 'id have been set';
-            $exception = new Zend_Feed_Exception($message);
+            $exception = new Writer\Exception\InvalidArgumentException($message);
             if (!$this->_ignoreExceptions) {
                 throw $exception;
             } else {
@@ -285,12 +284,13 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
             $this->getDataContainer()->setId(
                 $this->getDataContainer()->getLink());
         }
-        if (!Zend_Uri::check($this->getDataContainer()->getId()) &&
-        !preg_match("#^urn:[a-zA-Z0-9][a-zA-Z0-9\-]{1,31}:([a-zA-Z0-9\(\)\+\,\.\:\=\@\;\$\_\!\*\-]|%[0-9a-fA-F]{2})*#",
-            $this->getDataContainer()->getId()
-        ) && !$this->_validateTagUri($this->getDataContainer()->getId())) {
-            require_once 'Zend/Feed/Exception.php';
-            throw new Zend_Feed_Exception('Atom 1.0 IDs must be a valid URI/IRI');
+        if (!Uri\UriFactory::factory($this->getDataContainer()->getId())->isValid()
+            && !preg_match(
+                "#^urn:[a-zA-Z0-9][a-zA-Z0-9\-]{1,31}:([a-zA-Z0-9\(\)\+\,\.\:\=\@\;\$\_\!\*\-]|%[0-9a-fA-F]{2})*#",
+                $this->getDataContainer()->getId())
+            && !$this->_validateTagUri($this->getDataContainer()->getId())
+        ) {
+            throw new Writer\Exception\InvalidArgumentException('Atom 1.0 IDs must be a valid URI/IRI');
         }
         $id = $dom->createElement('id');
         $root->appendChild($id);
@@ -306,7 +306,7 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
      */
     protected function _validateTagUri($id)
     {
-        if (preg_match('/^tag:(?<name>.*),(?<date>\d{4}-?\d{0,2}-?\d{0,2}):(?<specific>.*)(.*:)*$/', $id, $matches)) {
+        if (preg_match('/^tag:(?P<name>.*),(?P<date>\d{4}-?\d{0,2}-?\d{0,2}):(?P<specific>.*)(.*:)*$/', $id, $matches)) {
             $dvalid = false;
             $nvalid = false;
             $date = $matches['date'];
@@ -318,7 +318,7 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
             } elseif ((strlen($date) == 10) && ($d6 < strtotime("now"))) {
                 $dvalid = true;
             }
-            $validator = new Zend_Validate_EmailAddress;
+            $validator = new Validator\EmailAddress;
             if ($validator->isValid($matches['name'])) {
                 $nvalid = true;
             } else {
@@ -336,17 +336,17 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
      * @param  DOMDocument $dom
      * @param  DOMElement $root
      * @return void
+     * @throws Writer\Exception\InvalidArgumentException
      */
     protected function _setContent(DOMDocument $dom, DOMElement $root)
     {
         $content = $this->getDataContainer()->getContent();
         if (!$content && !$this->getDataContainer()->getLink()) {
-            require_once 'Zend/Feed/Exception.php';
             $message = 'Atom 1.0 entry elements MUST contain exactly one '
             . 'atom:content element, or as an alternative, at least one link '
             . 'with a rel attribute of "alternate" to indicate an alternate '
             . 'method to consume the content.';
-            $exception = new Zend_Feed_Exception($message);
+            $exception = new Writer\Exception\InvalidArgumentException($message);
             if (!$this->_ignoreExceptions) {
                 throw $exception;
             } else {
@@ -372,7 +372,7 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
     {
         $xhtml = '';
         if (class_exists('tidy', false)) {
-            $tidy = new tidy;
+            $tidy = new \tidy;
             $config = array(
                 'output-xhtml' => true,
                 'show-body-only' => true,
@@ -435,7 +435,7 @@ class Zend_Feed_Writer_Renderer_Entry_Atom
         if (!$source) {
             return;
         }
-        $renderer = new Zend_Feed_Writer_Renderer_Feed_Atom_Source($source);
+        $renderer = new Renderer\Feed\AtomSource($source);
         $renderer->setType($this->getType());
         $element = $renderer->render()->getElement();
         $imported = $dom->importNode($element, true);

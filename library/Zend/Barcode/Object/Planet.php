@@ -17,18 +17,9 @@
  * @subpackage Object
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Planet.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Barcode_Object_Postnet
- */
-require_once 'Zend/Barcode/Object/Postnet.php';
-
-/**
- * @see Zend_Validate_Barcode
- */
-require_once 'Zend/Validate/Barcode.php';
+namespace Zend\Barcode\Object;
 
 /**
  * Class for generate Planet barcode
@@ -38,7 +29,7 @@ require_once 'Zend/Validate/Barcode.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Barcode_Object_Planet extends Zend_Barcode_Object_Postnet
+class Planet extends Postnet
 {
 
     /**
@@ -47,7 +38,7 @@ class Zend_Barcode_Object_Planet extends Zend_Barcode_Object_Postnet
      * - 1 = complete bar
      * @var array
      */
-    protected $_codingMap = array(
+    protected $codingMap = array(
         0 => "00111",
         1 => "11100",
         2 => "11010",

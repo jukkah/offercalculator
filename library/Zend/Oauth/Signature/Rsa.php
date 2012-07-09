@@ -13,49 +13,45 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth;
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Rsa.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** Zend_Oauth_Signature_SignatureAbstract */
-require_once 'Zend/Oauth/Signature/SignatureAbstract.php';
+namespace Zend\OAuth\Signature;
 
-/** Zend_Crypt_Rsa */
-require_once 'Zend/Crypt/Rsa.php';
+use Zend\Crypt\PublicKey\Rsa as RsaEnc;
+use Zend\Crypt\PublicKey\RsaOptions as RsaEncOptions;
 
 /**
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Oauth_Signature_Rsa extends Zend_Oauth_Signature_SignatureAbstract
+class Rsa extends AbstractSignature
 {
     /**
      * Sign a request
-     *
-     * @param  array $params
-     * @param  null|string $method
-     * @param  null|string $url
+     * 
+     * @param  array $params 
+     * @param  null|string $method 
+     * @param  null|string $url 
      * @return string
      */
-    public function sign(array $params, $method = null, $url = null)
+    public function sign(array $params, $method = null, $url = null) 
     {
-        $rsa = new Zend_Crypt_Rsa;
-        $rsa->setHashAlgorithm($this->_hashAlgorithm);
-        $sign = $rsa->sign(
-            $this->_getBaseSignatureString($params, $method, $url),
-            $this->_key,
-            Zend_Crypt_Rsa::BASE64
-        );
-        return $sign;
+        $rsa = new RsaEnc(new RsaEncOptions(array(
+            'hash_algorithm' => $this->_hashAlgorithm,
+            'bnary_output'   => true
+        )));
+
+        return $rsa->sign($this->_getBaseSignatureString($params, $method, $url), $this->_key);
     }
 
     /**
      * Assemble encryption key
-     *
+     * 
      * @return string
      */
     protected function _assembleKey()

@@ -11,16 +11,17 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Cloud
- * @subpackage DocumentService
+ * @package    Zend_Cloud_DocumentService
+ * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-require_once 'Zend/Cloud/DocumentService/Adapter.php';
-require_once 'Zend/Cloud/DocumentService/Document.php';
-require_once 'Zend/Cloud/DocumentService/DocumentSet.php';
-require_once 'Zend/Cloud/DocumentService/Query.php';
+namespace Zend\Cloud\DocumentService\Adapter;
+
+use Zend\Cloud\DocumentService\Document,
+    Zend\Cloud\DocumentService\DocumentSet,
+    Zend\Cloud\DocumentService\Query;
 
 /**
  * Abstract document service adapter
@@ -31,13 +32,12 @@ require_once 'Zend/Cloud/DocumentService/Query.php';
  * - query class objects
  *
  * @category   Zend
- * @package    Zend_Cloud
- * @subpackage DocumentService
+ * @package    Zend_Cloud_DocumentService
+ * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_Cloud_DocumentService_Adapter_AbstractAdapter
-    implements Zend_Cloud_DocumentService_Adapter
+abstract class AbstractAdapter implements AdapterInterface
 {
     const DOCUMENT_CLASS    = 'document_class';
     const DOCUMENTSET_CLASS = 'documentset_class';
@@ -47,26 +47,26 @@ abstract class Zend_Cloud_DocumentService_Adapter_AbstractAdapter
      * Class to utilize for new document objects
      * @var string
      */
-    protected $_documentClass = 'Zend_Cloud_DocumentService_Document';
+    protected $_documentClass = 'Zend\Cloud\DocumentService\Document';
 
     /**
      * Class to utilize for new document set objects
      * @var string
      */
-    protected $_documentSetClass = 'Zend_Cloud_DocumentService_DocumentSet';
+    protected $_documentSetClass = 'Zend\Cloud\DocumentService\DocumentSet';
 
     /**
      * Class to utilize for new query objects
      *
      * @var string
      */
-    protected $_queryClass = 'Zend_Cloud_DocumentService_Query';
+    protected $_queryClass = 'Zend\Cloud\DocumentService\Query';
 
     /**
      * Set the class for document objects
      *
      * @param  string $class
-     * @return Zend_Cloud_DocumentService_Adapter_AbstractAdapter
+     * @return \Zend\Cloud\DocumentService\Adapter\AbstractAdapter
      */
     public function setDocumentClass($class)
     {
@@ -88,7 +88,7 @@ abstract class Zend_Cloud_DocumentService_Adapter_AbstractAdapter
      * Set the class for document set objects
      *
      * @param  string $class
-     * @return Zend_Cloud_DocumentService_Adapter_AbstractAdapter
+     * @return \Zend\Cloud\DocumentService\Adapter\AbstractAdapter
      */
     public function setDocumentSetClass($class)
     {
@@ -110,7 +110,7 @@ abstract class Zend_Cloud_DocumentService_Adapter_AbstractAdapter
      * Set the query class for query objects
      *
      * @param  string $class
-     * @return Zend_Cloud_DocumentService_Adapter_AbstractAdapter
+     * @return \Zend\Cloud\DocumentService\Adapter\AbstractAdapter
      */
     public function setQueryClass($class)
     {

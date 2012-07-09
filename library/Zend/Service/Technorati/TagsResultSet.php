@@ -17,15 +17,11 @@
  * @subpackage Technorati
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: TagsResultSet.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
+namespace Zend\Service\Technorati;
 
-/**
- * @see Zend_Service_Technorati_ResultSet
- */
-require_once 'Zend/Service/Technorati/ResultSet.php';
-
+use DomDocument;
 
 /**
  * Represents a Technorati TopTags or BlogPostTags queries result set.
@@ -36,7 +32,7 @@ require_once 'Zend/Service/Technorati/ResultSet.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Technorati_TagsResultSet extends Zend_Service_Technorati_ResultSet
+class TagsResultSet extends AbstractResultSet
 {
     /**
      * Constructs a new object object from DOM Document.
@@ -47,21 +43,17 @@ class Zend_Service_Technorati_TagsResultSet extends Zend_Service_Technorati_Resu
     {
         parent::__construct($dom, $options);
 
-        $this->_totalResultsReturned  = (int) $this->_xpath->evaluate("count(/tapi/document/item)");
-        $this->_totalResultsAvailable = (int) $this->_totalResultsReturned;
+        $this->totalResultsReturned  = (int) $this->xpath->evaluate("count(/tapi/document/item)");
+        $this->totalResultsAvailable = (int) $this->totalResultsReturned;
     }
 
     /**
-     * Implements Zend_Service_Technorati_ResultSet::current().
+     * Implements AbstractResultSet::current().
      *
-     * @return Zend_Service_Technorati_TagsResult current result
+     * @return TagsResult current result
      */
     public function current()
     {
-        /**
-         * @see Zend_Service_Technorati_TagsResult
-         */
-        require_once 'Zend/Service/Technorati/TagsResult.php';
-        return new Zend_Service_Technorati_TagsResult($this->_results->item($this->_currentIndex));
+        return new TagsResult($this->results->item($this->currentIndex));
     }
 }

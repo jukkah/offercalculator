@@ -16,13 +16,9 @@
  * @package    Zend_Filter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Decompress.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Filter_Compress
- */
-require_once 'Zend/Filter/Compress.php';
+namespace Zend\Filter;
 
 /**
  * Decompresses a given string
@@ -32,17 +28,17 @@ require_once 'Zend/Filter/Compress.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Filter_Decompress extends Zend_Filter_Compress
+class Decompress extends Compress
 {
     /**
-     * Defined by Zend_Filter_Interface
+     * Defined by Zend_Filter_Filter
      *
      * Decompresses the content $value with the defined settings
      *
      * @param  string $value Content to decompress
      * @return string The decompressed content
      */
-    public function filter($value)
+    public function __invoke($value)
     {
         return $this->getAdapter()->decompress($value);
     }

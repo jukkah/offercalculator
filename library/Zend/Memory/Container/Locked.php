@@ -16,11 +16,9 @@
  * @package    Zend_Memory
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Locked.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** Zend_Memory_Container */
-require_once 'Zend/Memory/Container.php';
+namespace Zend\Memory\Container;
 
 /**
  * Memory value container
@@ -32,7 +30,7 @@ require_once 'Zend/Memory/Container.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Memory_Container_Locked extends Zend_Memory_Container
+class Locked extends AbstractContainer
 {
     /**
      * Value object
@@ -45,8 +43,6 @@ class Zend_Memory_Container_Locked extends Zend_Memory_Container
     /**
      * Object constructor
      *
-     * @param Zend_Memory_Manager $memoryManager
-     * @param integer $id
      * @param string $value
      */
     public function __construct($value)

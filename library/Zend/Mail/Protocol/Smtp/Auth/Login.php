@@ -17,15 +17,11 @@
  * @subpackage Protocol
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Login.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
+namespace Zend\Mail\Protocol\Smtp\Auth;
 
-/**
- * @see Zend_Mail_Protocol_Smtp
- */
-require_once 'Zend/Mail/Protocol/Smtp.php';
-
+use Zend\Mail\Protocol\Smtp;
 
 /**
  * Performs LOGIN authentication
@@ -36,14 +32,14 @@ require_once 'Zend/Mail/Protocol/Smtp.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Mail_Protocol_Smtp_Auth_Login extends Zend_Mail_Protocol_Smtp
+class Login extends Smtp
 {
     /**
      * LOGIN username
      *
      * @var string
      */
-    protected $_username;
+    protected $username;
 
 
     /**
@@ -51,7 +47,7 @@ class Zend_Mail_Protocol_Smtp_Auth_Login extends Zend_Mail_Protocol_Smtp
      *
      * @var string
      */
-    protected $_password;
+    protected $password;
 
 
     /**
@@ -60,27 +56,37 @@ class Zend_Mail_Protocol_Smtp_Auth_Login extends Zend_Mail_Protocol_Smtp
      * @param  string $host   (Default: 127.0.0.1)
      * @param  int    $port   (Default: null)
      * @param  array  $config Auth-specific parameters
-     * @return void
      */
     public function __construct($host = '127.0.0.1', $port = null, $config = null)
     {
-        if (is_array($config)) {
-            if (isset($config['username'])) {
-                $this->_username = $config['username'];
-            }
-            if (isset($config['password'])) {
-                $this->_password = $config['password'];
+        // Did we receive a configuration array?
+        $origConfig = $config;
+        if (is_array($host)) {
+            // Merge config array with principal array, if provided
+            if (is_array($config)) {
+                $config = array_replace_recursive($host, $config);
+            } else {
+                $config = $host;
             }
         }
 
-        parent::__construct($host, $port, $config);
+        if (is_array($config)) {
+            if (isset($config['username'])) {
+                $this->setUsername($config['username']);
+            }
+            if (isset($config['password'])) {
+                $this->setPassword($config['password']);
+            }
+        }
+
+        // Call parent with original arguments
+        parent::__construct($host, $port, $origConfig);
     }
 
 
     /**
      * Perform LOGIN authentication with supplied credentials
      *
-     * @return void
      */
     public function auth()
     {
@@ -89,10 +95,54 @@ class Zend_Mail_Protocol_Smtp_Auth_Login extends Zend_Mail_Protocol_Smtp
 
         $this->_send('AUTH LOGIN');
         $this->_expect(334);
-        $this->_send(base64_encode($this->_username));
+        $this->_send(base64_encode($this->getUsername()));
         $this->_expect(334);
-        $this->_send(base64_encode($this->_password));
+        $this->_send(base64_encode($this->getPassword()));
         $this->_expect(235);
         $this->_auth = true;
+    }
+
+    /**
+     * Set value for username
+     *
+     * @param  string $username
+     * @return Login
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+        return $this;
+    }
+    
+    /**
+     * Get username
+     *
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
+     * Set value for password
+     *
+     * @param  string $password
+     * @return Login
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
+        return $this;
+    }
+    
+    /**
+     * Get password
+     *
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
     }
 }

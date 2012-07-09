@@ -13,29 +13,27 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Plaintext.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** Zend_Oauth_Signature_SignatureAbstract */
-require_once 'Zend/Oauth/Signature/SignatureAbstract.php';
+namespace Zend\OAuth\Signature;
 
 /**
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Oauth_Signature_Plaintext extends Zend_Oauth_Signature_SignatureAbstract
+class Plaintext extends AbstractSignature
 {
     /**
      * Sign a request
-     *
-     * @param  array $params
-     * @param  null|string $method
-     * @param  null|string $url
+     * 
+     * @param  array $params 
+     * @param  null|string $method 
+     * @param  null|string $url 
      * @return string
      */
     public function sign(array $params, $method = null, $url = null)

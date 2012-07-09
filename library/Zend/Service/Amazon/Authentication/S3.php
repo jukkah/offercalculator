@@ -19,16 +19,8 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-
-/**
- * @see Zend_Service_Amazon_Authentication
- */
-require_once 'Zend/Service/Amazon/Authentication.php';
-
-/**
- * @see Zend_Crypt_Hmac
- */
-require_once 'Zend/Crypt/Hmac.php';
+namespace Zend\Service\Amazon\Authentication;
+use Zend\Crypt\Hmac;
 
 /**
  * @category   Zend
@@ -37,7 +29,7 @@ require_once 'Zend/Crypt/Hmac.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_Authentication_S3 extends Zend_Service_Amazon_Authentication
+class S3 extends AbstractAuthentication
 {
     /**
      * Add the S3 Authorization signature to the request headers
@@ -52,9 +44,9 @@ class Zend_Service_Amazon_Authentication_S3 extends Zend_Service_Amazon_Authenti
         if (! is_array($headers)) {
             $headers = array($headers);
         }
-
+        
         $type = $md5 = $date = '';
-
+        
         // Search for the Content-type, Content-MD5 and Date headers
         foreach ($headers as $key => $val) {
             if (strcasecmp($key, 'content-type') == 0) {
@@ -65,12 +57,12 @@ class Zend_Service_Amazon_Authentication_S3 extends Zend_Service_Amazon_Authenti
                 $date = $val;
             }
         }
-
+        
         // If we have an x-amz-date header, use that instead of the normal Date
         if (isset($headers['x-amz-date']) && isset($date)) {
             $date = '';
         }
-
+        
         $sig_str = "$method\n$md5\n$type\n$date\n";
 
         // For x-amz- headers, combine like keys, lowercase them, sort them
@@ -92,20 +84,20 @@ class Zend_Service_Amazon_Authentication_S3 extends Zend_Service_Amazon_Authenti
                 $sig_str .= $key . ':' . implode(',', $val) . "\n";
             }
         }
-
+        
         $sig_str .= '/'.parse_url($path, PHP_URL_PATH);
         if (strpos($path, '?location') !== false) {
             $sig_str .= '?location';
-        } else
+        } else 
             if (strpos($path, '?acl') !== false) {
                 $sig_str .= '?acl';
-            } else
+            } else 
                 if (strpos($path, '?torrent') !== false) {
                     $sig_str .= '?torrent';
                 }
-
-        $signature = base64_encode(Zend_Crypt_Hmac::compute($this->_secretKey, 'sha1', utf8_encode($sig_str), Zend_Crypt_Hmac::BINARY));
-        $headers['Authorization'] = 'AWS ' . $this->_accessKey . ':' . $signature;
+        
+        $signature = Hmac::compute($this->_secretKey, 'sha1', utf8_encode($sig_str), Hmac::OUTPUT_BINARY);
+        $headers['Authorization'] = 'AWS ' . $this->_accessKey . ':' . base64_encode($signature);
 
         return $sig_str;
     }

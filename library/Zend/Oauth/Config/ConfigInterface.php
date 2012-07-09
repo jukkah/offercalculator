@@ -13,19 +13,22 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: ConfigInterface.php 24594 2012-01-05 21:27:01Z matthew $
  */
+
+namespace Zend\OAuth\Config;
+
+use Zend\OAuth\Token\TokenInterface;
 
 /**
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_Oauth_Config_ConfigInterface
+interface ConfigInterface
 {
     public function setOptions(array $options);
 
@@ -69,11 +72,7 @@ interface Zend_Oauth_Config_ConfigInterface
 
     public function getUserAuthorizationUrl();
 
-    public function setToken(Zend_Oauth_Token $token);
+    public function setToken(TokenInterface $token);
 
     public function getToken();
-
-    public function setRealm($realm);
-
-    public function getRealm();
 }

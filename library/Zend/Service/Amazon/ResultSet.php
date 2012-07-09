@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -18,15 +17,10 @@
  * @subpackage Amazon
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: ResultSet.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-
-/**
- * @see Zend_Service_Amazon_Item
- */
-require_once 'Zend/Service/Amazon/Item.php';
-
+namespace Zend\Service\Amazon;
+use Zend\Service\Amazon\Exception;
 
 /**
  * @category   Zend
@@ -35,7 +29,7 @@ require_once 'Zend/Service/Amazon/Item.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_ResultSet implements SeekableIterator
+class ResultSet implements \SeekableIterator
 {
     /**
      * A DOMNodeList of <Item> elements
@@ -71,11 +65,11 @@ class Zend_Service_Amazon_ResultSet implements SeekableIterator
      * @param  DOMDocument $dom
      * @return void
      */
-    public function __construct(DOMDocument $dom)
+    public function __construct(\DOMDocument $dom)
     {
         $this->_dom = $dom;
-        $this->_xpath = new DOMXPath($dom);
-        $this->_xpath->registerNamespace('az', 'http://webservices.amazon.com/AWSECommerceService/2005-10-05');
+        $this->_xpath = new \DOMXPath($dom);
+        $this->_xpath->registerNamespace('az', 'http://webservices.amazon.com/AWSECommerceService/2011-08-01');
         $this->_results = $this->_xpath->query('//az:Item');
     }
 
@@ -108,7 +102,11 @@ class Zend_Service_Amazon_ResultSet implements SeekableIterator
      */
     public function current()
     {
-        return new Zend_Service_Amazon_Item($this->_results->item($this->_currentIndex));
+        $dom = $this->_results->item($this->_currentIndex);
+        if ($dom === null) {
+            throw new Exception\RuntimeException('no results found');
+        }
+        return new Item($dom);
     }
 
     /**
@@ -145,7 +143,7 @@ class Zend_Service_Amazon_ResultSet implements SeekableIterator
      * Implement SeekableIterator::seek()
      *
      * @param  int $index
-     * @throws OutOfBoundsException
+     * @throws \Zend\Service\Amazon\OutOfBoundsException
      * @return void
      */
     public function seek($index)
@@ -154,7 +152,7 @@ class Zend_Service_Amazon_ResultSet implements SeekableIterator
         if ($indexInt >= 0 && (null === $this->_results || $indexInt < $this->_results->length)) {
             $this->_currentIndex = $indexInt;
         } else {
-            throw new OutOfBoundsException("Illegal index '$index'");
+            throw new Exception\OutOfBoundsException("Illegal index '$index'");
         }
     }
 

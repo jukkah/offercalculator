@@ -19,11 +19,9 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** @see Zend_Captcha_Word */
-require_once 'Zend/Captcha/Word.php';
+namespace Zend\Captcha;
 
-/** @see Zend_Text_Figlet */
-require_once 'Zend/Text/Figlet.php';
+use Zend\Text\Figlet\Figlet as FigletManager;
 
 /**
  * Captcha based on figlet text rendering service
@@ -35,27 +33,36 @@ require_once 'Zend/Text/Figlet.php';
  * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Figlet.php 24594 2012-01-05 21:27:01Z matthew $
  */
-class Zend_Captcha_Figlet extends Zend_Captcha_Word
+class Figlet extends AbstractWord
 {
     /**
      * Figlet text renderer
      *
-     * @var Zend_Text_Figlet
+     * @var FigletManager
      */
-    protected $_figlet;
+    protected $figlet;
 
     /**
      * Constructor
      *
-     * @param  null|string|array|Zend_Config $options
+     * @param  null|string|array|\Traversable $options
      * @return void
      */
     public function __construct($options = null)
     {
         parent::__construct($options);
-        $this->_figlet = new Zend_Text_Figlet($options);
+        $this->figlet = new FigletManager($options);
+    }
+
+    /**
+     * Retrieve the composed figlet manager
+     * 
+     * @return FigletManager
+     */
+    public function getFiglet()
+    {
+        return $this->figlet;
     }
 
     /**
@@ -65,21 +72,17 @@ class Zend_Captcha_Figlet extends Zend_Captcha_Word
      */
     public function generate()
     {
-        $this->_useNumbers = false;
+        $this->useNumbers = false;
         return parent::generate();
     }
 
     /**
-     * Display the captcha
-     *
-     * @param Zend_View_Interface $view
-     * @param mixed $element
+     * Get helper name used to render captcha
+     * 
      * @return string
      */
-    public function render(Zend_View_Interface $view = null, $element = null)
+    public function getHelperName()
     {
-        return '<pre>'
-             . $this->_figlet->render($this->getWord())
-             . "</pre>\n";
+        return 'captcha/figlet';
     }
 }

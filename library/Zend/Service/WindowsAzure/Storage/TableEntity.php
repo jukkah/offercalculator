@@ -1,42 +1,24 @@
 <?php
 /**
- * Zend Framework
+ * Zend Framework (http://framework.zend.com/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://framework.zend.com/license/new-bsd
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
- *
- * @category   Zend
- * @package    Zend_Service_WindowsAzure
- * @subpackage Storage
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: TableEntity.php 24594 2012-01-05 21:27:01Z matthew $
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
+ * @package   Zend_Service_WindowsAzure
  */
 
-/**
- * @see Zend_Service_WindowsAzure_Exception
- */
-require_once 'Zend/Service/WindowsAzure/Exception.php';
+namespace Zend\Service\WindowsAzure\Storage;
 
+use Zend\Service\WindowsAzure\Exception\UnknownPropertyException;
 
 /**
  * @category   Zend
  * @package    Zend_Service_WindowsAzure
  * @subpackage Storage
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_WindowsAzure_Storage_TableEntity
+class TableEntity
 {
-    const DEFAULT_TIMESTAMP = '1900-01-01T00:00:00';
-
     /**
      * Partition key
      *
@@ -56,7 +38,7 @@ class Zend_Service_WindowsAzure_Storage_TableEntity
      *
      * @var string
      */
-    protected $_timestamp;
+    protected $_timestamp = '1900-01-01T00:00:00';
 
     /**
      * Etag
@@ -72,7 +54,7 @@ class Zend_Service_WindowsAzure_Storage_TableEntity
      * @param string  $rowKey          Row key
      */
     public function __construct($partitionKey = '', $rowKey = '')
-    {	
+    {
         $this->_partitionKey = $partitionKey;
         $this->_rowKey       = $rowKey;
     }
@@ -129,9 +111,6 @@ class Zend_Service_WindowsAzure_Storage_TableEntity
      */
     public function getTimestamp()
     {
-        if (null === $this->_timestamp) {
-            $this->setTimestamp(self::DEFAULT_TIMESTAMP);
-        }
         return $this->_timestamp;
     }
 
@@ -174,20 +153,22 @@ class Zend_Service_WindowsAzure_Storage_TableEntity
     public function getAzureValues()
     {
         // Get accessors
-        $accessors = self::getAzureAccessors(get_class($this));
+        $accessors = self::getAzureAccessors(get_called_class());
 
         // Loop accessors and retrieve values
         $returnValue = array();
         foreach ($accessors as $accessor) {
             if ($accessor->EntityType == 'ReflectionProperty') {
-                $property = $accessor->EntityAccessor;
+                $property      = $accessor->EntityAccessor;
                 $returnValue[] = (object)array(
                     'Name'  => $accessor->AzurePropertyName,
                     'Type'  => $accessor->AzurePropertyType,
                     'Value' => $this->$property,
                 );
-            } else if ($accessor->EntityType == 'ReflectionMethod' && substr(strtolower($accessor->EntityAccessor), 0, 3) == 'get') {
-                $method = $accessor->EntityAccessor;
+            } else if ($accessor->EntityType == 'ReflectionMethod' &&
+                       substr(strtolower($accessor->EntityAccessor), 0, 3) == 'get'
+            ) {
+                $method        = $accessor->EntityAccessor;
                 $returnValue[] = (object)array(
                     'Name'  => $accessor->AzurePropertyName,
                     'Type'  => $accessor->AzurePropertyType,
@@ -203,14 +184,15 @@ class Zend_Service_WindowsAzure_Storage_TableEntity
     /**
      * Set Azure values
      *
-     * @param array $values
-     * @param boolean $throwOnError Throw Zend_Service_WindowsAzure_Exception when a property is not specified in $values?
-     * @throws Zend_Service_WindowsAzure_Exception
+     * @param array   $values
+     * @param boolean $throwOnError Throw UnknownPropertyException when a property is not specified in $values?
+     * @throws UnknownPropertyException
+     * @return array
      */
     public function setAzureValues($values = array(), $throwOnError = false)
     {
         // Get accessors
-        $accessors = self::getAzureAccessors(get_class($this));
+        $accessors = self::getAzureAccessors(get_called_class());
 
         // Loop accessors and set values
         $returnValue = array();
@@ -221,28 +203,37 @@ class Zend_Service_WindowsAzure_Storage_TableEntity
                     switch (strtolower($accessor->AzurePropertyType)) {
                         case 'edm.int32':
                         case 'edm.int64':
-                            $values[$accessor->AzurePropertyName] = intval($values[$accessor->AzurePropertyName]); break;
+                            $values[$accessor->AzurePropertyName] = intval($values[$accessor->AzurePropertyName]);
+                            break;
                         case 'edm.boolean':
-                            if ($values[$accessor->AzurePropertyName] == 'true' || $values[$accessor->AzurePropertyName] == '1')
+                            if ($values[$accessor->AzurePropertyName] == 'true' ||
+                                $values[$accessor->AzurePropertyName] == '1'
+                            ) {
                                 $values[$accessor->AzurePropertyName] = true;
-                            else
+                            }
+                            else {
                                 $values[$accessor->AzurePropertyName] = false;
+                            }
                             break;
                         case 'edm.double':
-                            $values[$accessor->AzurePropertyName] = floatval($values[$accessor->AzurePropertyName]); break;
+                            $values[$accessor->AzurePropertyName] = floatval($values[$accessor->AzurePropertyName]);
+                            break;
                     }
                 }
 
                 // Assign value
                 if ($accessor->EntityType == 'ReflectionProperty') {
-                    $property = $accessor->EntityAccessor;
+                    $property        = $accessor->EntityAccessor;
                     $this->$property = $values[$accessor->AzurePropertyName];
-                } else if ($accessor->EntityType == 'ReflectionMethod' && substr(strtolower($accessor->EntityAccessor), 0, 3) == 'set') {
+                } else if ($accessor->EntityType == 'ReflectionMethod' &&
+                           substr(strtolower($accessor->EntityAccessor), 0, 3) == 'set'
+                ) {
                     $method = $accessor->EntityAccessor;
                     $this->$method($values[$accessor->AzurePropertyName]);
                 }
             } else if ($throwOnError) {
-                throw new Zend_Service_WindowsAzure_Exception("Property '" . $accessor->AzurePropertyName . "' was not found in \$values array");
+                throw new UnknownPropertyException(
+                    "Property '" . $accessor->AzurePropertyName . "' was not found in \$values array");
             }
         }
 
@@ -262,7 +253,7 @@ class Zend_Service_WindowsAzure_Storage_TableEntity
         $azureAccessors = array();
 
         // Get all types
-        $type = new ReflectionClass($className);
+        $type = new \ReflectionClass($className);
 
         // Loop all properties
         $properties = $type->getProperties();
@@ -289,7 +280,7 @@ class Zend_Service_WindowsAzure_Storage_TableEntity
     /**
      * Get Azure accessor from reflection member
      *
-     * @param ReflectionProperty|ReflectionMethod $member
+     * @param \ReflectionProperty|\ReflectionMethod $member
      * @return object
      */
     public static function getAzureAccessor($member)
@@ -298,8 +289,7 @@ class Zend_Service_WindowsAzure_Storage_TableEntity
         $docComment = $member->getDocComment();
 
         // Check for Azure comment
-        if (strpos($docComment, '@azure') === false)
-        {
+        if (strpos($docComment, '@azure') === false) {
             return null;
         }
 

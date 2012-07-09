@@ -15,23 +15,15 @@
  * @category   Zend
  * @package    Zend_Http
  * @subpackage Client_Adapter
- * @version    $Id: Test.php 24594 2012-01-05 21:27:01Z matthew $
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/**
- * @see Zend_Uri_Http
- */
-require_once 'Zend/Uri/Http.php';
-/**
- * @see Zend_Http_Response
- */
-require_once 'Zend/Http/Response.php';
-/**
- * @see Zend_Http_Client_Adapter_Interface
- */
-require_once 'Zend/Http/Client/Adapter/Interface.php';
+namespace Zend\Http\Client\Adapter;
+
+use Traversable;
+use Zend\Stdlib\ArrayUtils;
+use Zend\Http\Response;
 
 /**
  * A testing-purposes adapter.
@@ -47,7 +39,7 @@ require_once 'Zend/Http/Client/Adapter/Interface.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Http_Client_Adapter_Test implements Zend_Http_Client_Adapter_Interface
+class Test implements AdapterInterface
 {
     /**
      * Parameters array
@@ -79,8 +71,7 @@ class Zend_Http_Client_Adapter_Test implements Zend_Http_Client_Adapter_Interfac
     protected $_nextRequestWillFail = false;
 
     /**
-     * Adapter constructor, currently empty. Config is set using setConfig()
-     *
+     * Adapter constructor, currently empty. Config is set using setOptions()
      */
     public function __construct()
     { }
@@ -89,7 +80,7 @@ class Zend_Http_Client_Adapter_Test implements Zend_Http_Client_Adapter_Interfac
      * Set the nextRequestWillFail flag
      *
      * @param boolean $flag
-     * @return Zend_Http_Client_Adapter_Test
+     * @return \Zend\Http\Client\Adapter\Test
      */
     public function setNextRequestWillFail($flag)
     {
@@ -101,21 +92,21 @@ class Zend_Http_Client_Adapter_Test implements Zend_Http_Client_Adapter_Interfac
     /**
      * Set the configuration array for the adapter
      *
-     * @param Zend_Config | array $config
+     * @param  array|Traversable $options
      */
-    public function setConfig($config = array())
+    public function setOptions($options = array())
     {
-        if ($config instanceof Zend_Config) {
-            $config = $config->toArray();
+        if ($options instanceof Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
+        }
 
-        } elseif (! is_array($config)) {
-            require_once 'Zend/Http/Client/Adapter/Exception.php';
-            throw new Zend_Http_Client_Adapter_Exception(
-                'Array or Zend_Config object expected, got ' . gettype($config)
+        if (! is_array($options)) {
+            throw new Exception\InvalidArgumentException(
+                'Array or Traversable object expected, got ' . gettype($options)
             );
         }
 
-        foreach ($config as $k => $v) {
+        foreach ($options as $k => $v) {
             $this->config[strtolower($k)] = $v;
         }
     }
@@ -128,14 +119,13 @@ class Zend_Http_Client_Adapter_Test implements Zend_Http_Client_Adapter_Interfac
      * @param int     $port
      * @param boolean $secure
      * @param int     $timeout
-     * @throws Zend_Http_Client_Adapter_Exception
+     * @throws Exception\RuntimeException
      */
     public function connect($host, $port = 80, $secure = false)
     {
         if ($this->_nextRequestWillFail) {
             $this->_nextRequestWillFail = false;
-            require_once 'Zend/Http/Client/Adapter/Exception.php';
-            throw new Zend_Http_Client_Adapter_Exception('Request failed');
+            throw new Exception\RuntimeException('Request failed');
         }
     }
 
@@ -143,7 +133,7 @@ class Zend_Http_Client_Adapter_Test implements Zend_Http_Client_Adapter_Interfac
      * Send request to the remote server
      *
      * @param string        $method
-     * @param Zend_Uri_Http $uri
+     * @param \Zend\Uri\Uri $uri
      * @param string        $http_ver
      * @param array         $headers
      * @param string        $body
@@ -156,6 +146,9 @@ class Zend_Http_Client_Adapter_Test implements Zend_Http_Client_Adapter_Interfac
 
         // Build request headers
         $path = $uri->getPath();
+        if (empty($path)) {
+            $path = '/';
+        }
         if ($uri->getQuery()) $path .= '?' . $uri->getQuery();
         $request = "{$method} {$path} HTTP/{$http_ver}\r\n";
         foreach ($headers as $k => $v) {
@@ -194,28 +187,28 @@ class Zend_Http_Client_Adapter_Test implements Zend_Http_Client_Adapter_Interfac
     /**
      * Set the HTTP response(s) to be returned by this adapter
      *
-     * @param Zend_Http_Response|array|string $response
+     * @param \Zend\Http\Response|array|string $response
      */
     public function setResponse($response)
     {
-        if ($response instanceof Zend_Http_Response) {
-            $response = $response->asString("\r\n");
+        if ($response instanceof Response) {
+            $response = $response->toString();
         }
 
-        $this->responses = (array)$response;
+        $this->responses = (array) $response;
         $this->responseIndex = 0;
     }
 
     /**
      * Add another response to the response buffer.
      *
-     * @param string Zend_Http_Response|$response
+     * @param string \Zend\Http\Response|$response
      */
     public function addResponse($response)
     {
-         if ($response instanceof Zend_Http_Response) {
-            $response = $response->asString("\r\n");
-        }
+         if ($response instanceof Response) {
+            $response = $response->toString();
+         }
 
         $this->responses[] = $response;
     }
@@ -229,20 +222,9 @@ class Zend_Http_Client_Adapter_Test implements Zend_Http_Client_Adapter_Interfac
     public function setResponseIndex($index)
     {
         if ($index < 0 || $index >= count($this->responses)) {
-            require_once 'Zend/Http/Client/Adapter/Exception.php';
-            throw new Zend_Http_Client_Adapter_Exception(
+            throw new Exception\OutOfRangeException(
                 'Index out of range of response buffer size');
         }
         $this->responseIndex = $index;
-    }
-
-    /**
-     * Retrieve the array of all configuration options
-     *
-     * @return array
-     */
-    public function getConfig()
-    {
-        return $this->config;
     }
 }

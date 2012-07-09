@@ -17,13 +17,11 @@
  * @subpackage Ec2
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: CloudWatch.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Service_Amazon_Ec2_Abstract
- */
-require_once 'Zend/Service/Amazon/Ec2/Abstract.php';
+namespace Zend\Service\Amazon\Ec2;
+use Zend\Service\Amazon;
+use Zend\Service\Amazon\Ec2\Exception;
 
 /**
  * An Amazon EC2 interface that allows yout to run, terminate, reboot and describe Amazon
@@ -35,7 +33,7 @@ require_once 'Zend/Service/Amazon/Ec2/Abstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_Ec2_CloudWatch extends Zend_Service_Amazon_Ec2_Abstract
+class CloudWatch extends AbstractEc2
 {
     /**
      * The HTTP query server
@@ -243,7 +241,7 @@ class Zend_Service_Amazon_Ec2_CloudWatch extends Zend_Service_Amazon_Ec2_Abstrac
         }
 
         if (!isset($options['MeasureName']) || !in_array($options['MeasureName'], $this->_validMetrics, true)) {
-            throw new Zend_Service_Amazon_Ec2_Exception('Invalid Metric Type: ' . $options['MeasureName']);
+            throw new Exception\InvalidArgumentException('Invalid Metric Type: ' . $options['MeasureName']);
         }
 
         if(!isset($options['Statistics'])) {
@@ -281,7 +279,7 @@ class Zend_Service_Amazon_Ec2_CloudWatch extends Zend_Service_Amazon_Ec2_Abstrac
                 $options['Dimensions.member.' . $x . '.Value'] = $dimVal;
                 $x++;
             }
-
+            
             unset($options['Dimensions']);
         }
 

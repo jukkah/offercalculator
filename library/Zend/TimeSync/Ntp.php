@@ -16,23 +16,21 @@
  * @package   Zend_TimeSync
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
- * @version   $Id: Ntp.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * Zend_TimeSync_Protocol
- */
-require_once 'Zend/TimeSync/Protocol.php';
+namespace Zend\TimeSync;
+
+use Zend\TimeSync\Exception;
 
 /**
  * NTP Protocol handling class
  *
  * @category  Zend
  * @package   Zend_TimeSync
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_TimeSync_Ntp extends Zend_TimeSync_Protocol
+class Ntp extends AbstractProtocol
 {
     /**
      * NTP port number (123) assigned by the Internet Assigned Numbers Authority
@@ -199,7 +197,7 @@ class Zend_TimeSync_Ntp extends Zend_TimeSync_Protocol
      * This will return an array with binary data listing:
      *
      * @return array
-     * @throws Zend_TimeSync_Exception When timeserver can not be connected
+     * @throws Exception\ExceptionInterface When timeserver can not be connected
      */
     protected function _read()
     {
@@ -208,7 +206,7 @@ class Zend_TimeSync_Ntp extends Zend_TimeSync_Protocol
 
         if ($info['timed_out'] === true) {
             fclose($this->_socket);
-            throw new Zend_TimeSync_Exception('could not connect to ' .
+            throw new Exception\RuntimeException('could not connect to ' .
                 "'$this->_timeserver' on port '$this->_port', reason: 'server timed out'");
         }
 
@@ -242,7 +240,7 @@ class Zend_TimeSync_Ntp extends Zend_TimeSync_Protocol
         $this->_connect();
 
         fwrite($this->_socket, $data);
-        stream_set_timeout($this->_socket, Zend_TimeSync::$options['timeout']);
+        stream_set_timeout($this->_socket, TimeSync::$options['timeout']);
     }
 
     /**

@@ -17,13 +17,9 @@
  * @subpackage Ec2
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Response.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Http_Response
- */
-require_once 'Zend/Http/Response.php';
+namespace Zend\Service\Amazon\Ec2;
 
 /**
  * @category   Zend
@@ -32,7 +28,8 @@ require_once 'Zend/Http/Response.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_Ec2_Response {
+class Response
+{
     /**
      * XML namespace used for EC2 responses.
      */
@@ -62,25 +59,11 @@ class Zend_Service_Amazon_Ec2_Response {
     private $_xpath = null;
 
     /**
-     * Last error code
-     *
-     * @var integer
-     */
-    private $_errorCode = 0;
-
-    /**
-     * Last error message
-     *
-     * @var string
-     */
-    private $_errorMessage = '';
-
-    /**
      * Creates a new high-level EC2 response object
      *
      * @param Zend_Http_Response $httpResponse the HTTP response.
      */
-    public function __construct(Zend_Http_Response $httpResponse)
+    public function __construct(\Zend\Http\Response $httpResponse)
     {
         $this->_httpResponse = $httpResponse;
     }
@@ -97,7 +80,7 @@ class Zend_Service_Amazon_Ec2_Response {
             if ($document === false) {
                 $this->_xpath = false;
             } else {
-                $this->_xpath = new DOMXPath($document);
+                $this->_xpath = new \DOMXPath($document);
                 $this->_xpath->registerNamespace('ec2',
                     $this->getNamespace());
             }
@@ -115,7 +98,7 @@ class Zend_Service_Amazon_Ec2_Response {
     {
         try {
             $body = $this->_httpResponse->getBody();
-        } catch (Zend_Http_Exception $e) {
+        } catch (\Zend\Http\Exception\ExceptionInterface $e) {
             $body = false;
         }
 
@@ -124,7 +107,7 @@ class Zend_Service_Amazon_Ec2_Response {
                 // turn off libxml error handling
                 $errors = libxml_use_internal_errors();
 
-                $this->_document = new DOMDocument();
+                $this->_document = new \DOMDocument();
                 if (!$this->_document->loadXML($body)) {
                     $this->_document = false;
                 }

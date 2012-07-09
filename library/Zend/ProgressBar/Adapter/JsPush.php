@@ -14,18 +14,11 @@
  * @package    Zend_ProgressBar
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: JsPush.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Json
- */
-require_once 'Zend/Json.php';
+namespace Zend\ProgressBar\Adapter;
 
-/**
- * @see Zend_ProgressBar_Adapter
- */
-require_once 'Zend/ProgressBar/Adapter.php';
+use Zend\Json\Json;
 
 /**
  * Zend_ProgressBar_Adapter_JsPush offers a simple method for updating a
@@ -33,18 +26,17 @@ require_once 'Zend/ProgressBar/Adapter.php';
  *
  * @category  Zend
  * @package   Zend_ProgressBar
- * @uses      Zend_ProgressBar_Adapter_Interface
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_ProgressBar_Adapter_JsPush extends Zend_ProgressBar_Adapter
+class JsPush extends AbstractAdapter
 {
     /**
      * Name of the JavaScript method to call on update
      *
      * @var string
      */
-    protected $_updateMethodName = 'Zend_ProgressBar_Update';
+    protected $_updateMethodName = 'Zend\ProgressBar\ProgressBar\Update';
 
     /**
      * Name of the JavaScript method to call on finish
@@ -57,7 +49,7 @@ class Zend_ProgressBar_Adapter_JsPush extends Zend_ProgressBar_Adapter
      * Set the update method name
      *
      * @param  string $methodName
-     * @return Zend_ProgressBar_Adapter_JsPush
+     * @return \Zend\ProgressBar\Adapter\JsPush
      */
     public function setUpdateMethodName($methodName)
     {
@@ -70,7 +62,7 @@ class Zend_ProgressBar_Adapter_JsPush extends Zend_ProgressBar_Adapter
      * Set the finish method name
      *
      * @param  string $methodName
-     * @return Zend_ProgressBar_Adapter_JsPush
+     * @return \Zend\ProgressBar\Adapter\JsPush
      */
     public function setFinishMethodName($methodName)
     {
@@ -80,7 +72,7 @@ class Zend_ProgressBar_Adapter_JsPush extends Zend_ProgressBar_Adapter
     }
 
     /**
-     * Defined by Zend_ProgressBar_Adapter_Interface
+     * Defined by Zend\ProgressBar\Adapter\AbstractAdapter
      *
      * @param  float   $current       Current progress value
      * @param  float   $max           Max progress value
@@ -102,7 +94,7 @@ class Zend_ProgressBar_Adapter_JsPush extends Zend_ProgressBar_Adapter
         );
 
         $data = '<script type="text/javascript">'
-              . 'parent.' . $this->_updateMethodName . '(' . Zend_Json::encode($arguments) . ');'
+              . 'parent.' . $this->_updateMethodName . '(' . Json::encode($arguments) . ');'
               . '</script>';
 
         // Output the data
@@ -110,7 +102,7 @@ class Zend_ProgressBar_Adapter_JsPush extends Zend_ProgressBar_Adapter
     }
 
     /**
-     * Defined by Zend_ProgressBar_Adapter_Interface
+     * Defined by Zend\ProgressBar\Adapter\AbstractAdapter
      *
      * @return void
      */

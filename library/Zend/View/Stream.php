@@ -16,8 +16,9 @@
  * @package    Zend_View
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Stream.php 24594 2012-01-05 21:27:01Z matthew $
  */
+
+namespace Zend\View;
 
 /**
  * Stream wrapper to convert markup of mostly-PHP templates into PHP prior to
@@ -37,7 +38,7 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Stream
+class Stream
 {
     /**
      * Current stream position.

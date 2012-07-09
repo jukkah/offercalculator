@@ -17,18 +17,9 @@
  * @subpackage Object
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Identcode.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Barcode_Object_Code25interleaved
- */
-require_once 'Zend/Barcode/Object/Code25interleaved.php';
-
-/**
- * @see Zend_Validate_Barcode
- */
-require_once 'Zend/Validate/Barcode.php';
+namespace Zend\Barcode\Object;
 
 /**
  * Class for generate Identcode barcode
@@ -38,17 +29,17 @@ require_once 'Zend/Validate/Barcode.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Barcode_Object_Identcode extends Zend_Barcode_Object_Code25interleaved
+class Identcode extends Code25interleaved
 {
 
     /**
      * Default options for Identcode barcode
      * @return void
      */
-    protected function _getDefaultOptions()
+    protected function getDefaultOptions()
     {
-        $this->_barcodeLength = 12;
-        $this->_mandatoryChecksum = true;
+        $this->barcodeLength = 12;
+        $this->mandatoryChecksum = true;
     }
 
     /**
@@ -64,13 +55,13 @@ class Zend_Barcode_Object_Identcode extends Zend_Barcode_Object_Code25interleave
 
     /**
      * Check allowed characters
-     * @param string $value
+     * @param  string $value
      * @return string
-     * @throw Zend_Barcode_Object_Exception
+     * @throw  Exception
      */
     public function validateText($value)
     {
-        $this->_validateText($value, array('validator' => $this->getType()));
+        $this->validateSpecificText($value, array('validator' => $this->getType()));
     }
 
     /**
@@ -81,7 +72,7 @@ class Zend_Barcode_Object_Identcode extends Zend_Barcode_Object_Code25interleave
      */
     public function getChecksum($text)
     {
-        $this->_checkText($text);
+        $this->checkText($text);
         $checksum = 0;
 
         for ($i = strlen($text); $i > 0; $i --) {

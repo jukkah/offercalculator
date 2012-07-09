@@ -19,42 +19,16 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Form_Element_Multi */
-require_once 'Zend/Form/Element/Multi.php';
+namespace Zend\Form\Element;
+
 
 /**
- * Radio form element
- *
  * @category   Zend
  * @package    Zend_Form
  * @subpackage Element
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Radio.php 24594 2012-01-05 21:27:01Z matthew $
  */
-class Zend_Form_Element_Radio extends Zend_Form_Element_Multi
+class Radio extends MultiCheckbox
 {
-    /**
-     * Use formRadio view helper by default
-     * @var string
-     */
-    public $helper = 'formRadio';
-
-    /**
-     * Load default decorators
-     *
-     * Disables "for" attribute of label if label decorator enabled.
-     *
-     * @return Zend_Form_Element_Radio
-     */
-    public function loadDefaultDecorators()
-    {
-        if ($this->loadDefaultDecoratorsIsDisabled()) {
-            return $this;
-        }
-        parent::loadDefaultDecorators();
-        $this->addDecorator('Label', array('tag' => 'dt',
-                                           'disableFor' => true));
-        return $this;
-    }
 }

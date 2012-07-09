@@ -13,22 +13,22 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: AuthorizedRequest.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** Zend_Oauth_Token */
-require_once 'Zend/Oauth/Token.php';
+namespace Zend\OAuth\Token;
+
+use Zend\OAuth\Http;
 
 /**
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Oauth_Token_AuthorizedRequest extends Zend_Oauth_Token
+class AuthorizedRequest extends AbstractToken
 {
     /**
      * @var array
@@ -39,10 +39,10 @@ class Zend_Oauth_Token_AuthorizedRequest extends Zend_Oauth_Token
      * Constructor
      *
      * @param  null|array $data
-     * @param  null|Zend_Oauth_Http_Utility $utility
+     * @param  null|\Zend\OAuth\Http\Utility $utility
      * @return void
      */
-    public function __construct(array $data = null, Zend_Oauth_Http_Utility $utility = null)
+    public function __construct(array $data = null, Http\Utility $utility = null)
     {
         if ($data !== null) {
             $this->_data = $data;
@@ -54,13 +54,13 @@ class Zend_Oauth_Token_AuthorizedRequest extends Zend_Oauth_Token
         if ($utility !== null) {
             $this->_httpUtility = $utility;
         } else {
-            $this->_httpUtility = new Zend_Oauth_Http_Utility;
+            $this->_httpUtility = new Http\Utility;
         }
     }
 
     /**
      * Retrieve token data
-     *
+     * 
      * @return array
      */
     public function getData()
@@ -70,7 +70,7 @@ class Zend_Oauth_Token_AuthorizedRequest extends Zend_Oauth_Token
 
     /**
      * Indicate if token is valid
-     *
+     * 
      * @return bool
      */
     public function isValid()
@@ -85,7 +85,7 @@ class Zend_Oauth_Token_AuthorizedRequest extends Zend_Oauth_Token
 
     /**
      * Parse string data into array
-     *
+     * 
      * @return array
      */
     protected function _parseData()

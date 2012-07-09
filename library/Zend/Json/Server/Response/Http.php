@@ -16,13 +16,11 @@
  * @package    Zend_Json
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Http.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Json_Server_Response
- */
-require_once 'Zend/Json/Server/Response.php';
+namespace Zend\Json\Server\Response;
+
+use Zend\Json\Server\Response as JsonResponse;
 
 /**
  * @category   Zend
@@ -30,7 +28,7 @@ require_once 'Zend/Json/Server/Response.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Json_Server_Response_Http extends Zend_Json_Server_Response
+class Http extends JsonResponse
 {
     /**
      * Emit JSON

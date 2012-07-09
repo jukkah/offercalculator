@@ -17,13 +17,17 @@
  * @subpackage Helper
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Sitemap.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_View_Helper_Navigation_HelperAbstract
- */
-require_once 'Zend/View/Helper/Navigation/HelperAbstract.php';
+namespace Zend\View\Helper\Navigation;
+
+use DOMDocument;
+use RecursiveIteratorIterator;
+use Zend\Navigation\Page\AbstractPage;
+use Zend\Navigation\AbstractContainer;
+use Zend\Uri;
+use Zend\View;
+use Zend\View\Exception;
 
 /**
  * Helper for printing sitemaps
@@ -36,8 +40,7 @@ require_once 'Zend/View/Helper/Navigation/HelperAbstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_Navigation_Sitemap
-    extends Zend_View_Helper_Navigation_HelperAbstract
+class Sitemap extends AbstractHelper
 {
     /**
      * Namespace for the <urlset> tag
@@ -58,46 +61,50 @@ class Zend_View_Helper_Navigation_Sitemap
      *
      * @var bool
      */
-    protected $_formatOutput = false;
+    protected $formatOutput = false;
 
     /**
      * Whether the XML declaration should be included in XML output
      *
      * @var bool
      */
-    protected $_useXmlDeclaration = true;
+    protected $useXmlDeclaration = true;
 
     /**
-     * Whether sitemap should be validated using Zend_Validate_Sitemap_*
+     * Whether sitemap should be validated using Zend\Validate\Sitemap\*
      *
      * @var bool
      */
-    protected $_useSitemapValidators = true;
+    protected $useSitemapValidators = true;
 
     /**
      * Whether sitemap should be schema validated when generated
      *
      * @var bool
      */
-    protected $_useSchemaValidation = false;
+    protected $useSchemaValidation = false;
 
     /**
      * Server url
      *
      * @var string
      */
-    protected $_serverUrl;
+    protected $serverUrl;
 
     /**
-     * View helper entry point:
-     * Retrieves helper and optionally sets container to operate on
+     * List of urls in the sitemap
      *
-     * @param  Zend_Navigation_Container $container  [optional] container to
-     *                                               operate on
-     * @return Zend_View_Helper_Navigation_Sitemap   fluent interface, returns
-     *                                               self
+     * @var array
      */
-    public function sitemap(Zend_Navigation_Container $container = null)
+    protected $urls = array();
+
+    /**
+     * Helper entry point
+     *
+     * @param  string|AbstractContainer $container container to operate on
+     * @return Navigation
+     */
+    public function __invoke($container = null)
     {
         if (null !== $container) {
             $this->setContainer($container);
@@ -106,20 +113,15 @@ class Zend_View_Helper_Navigation_Sitemap
         return $this;
     }
 
-    // Accessors:
-
     /**
      * Sets whether XML output should be formatted
      *
-     * @param  bool $formatOutput                   [optional] whether output
-     *                                              should be formatted. Default
-     *                                              is true.
-     * @return Zend_View_Helper_Navigation_Sitemap  fluent interface, returns
-     *                                              self
+     * @param  bool $formatOutput [optional] whether output should be formatted. Default is true.
+     * @return Sitemap  fluent interface, returns self
      */
     public function setFormatOutput($formatOutput = true)
     {
-        $this->_formatOutput = (bool) $formatOutput;
+        $this->formatOutput = (bool) $formatOutput;
         return $this;
     }
 
@@ -130,20 +132,18 @@ class Zend_View_Helper_Navigation_Sitemap
      */
     public function getFormatOutput()
     {
-        return $this->_formatOutput;
+        return $this->formatOutput;
     }
 
     /**
      * Sets whether the XML declaration should be used in output
      *
-     * @param  bool $useXmlDecl                     whether XML delcaration
-     *                                              should be rendered
-     * @return Zend_View_Helper_Navigation_Sitemap  fluent interface, returns
-     *                                              self
+     * @param  bool $useXmlDecl whether XML delcaration should be rendered
+     * @returnSitemap  fluent interface, returns self
      */
     public function setUseXmlDeclaration($useXmlDecl)
     {
-        $this->_useXmlDeclaration = (bool) $useXmlDecl;
+        $this->useXmlDeclaration = (bool) $useXmlDecl;
         return $this;
     }
 
@@ -154,44 +154,40 @@ class Zend_View_Helper_Navigation_Sitemap
      */
     public function getUseXmlDeclaration()
     {
-        return $this->_useXmlDeclaration;
+        return $this->useXmlDeclaration;
     }
 
     /**
-     * Sets whether sitemap should be validated using Zend_Validate_Sitemap_*
+     * Sets whether sitemap should be validated using Zend\Validate\Sitemap_*
      *
-     * @param  bool $useSitemapValidators           whether sitemap validators
-     *                                              should be used
-     * @return Zend_View_Helper_Navigation_Sitemap  fluent interface, returns
-     *                                              self
+     * @param  bool $useSitemapValidators whether sitemap validators should be used
+     * @returnSitemap  fluent interface, returns self
      */
     public function setUseSitemapValidators($useSitemapValidators)
     {
-        $this->_useSitemapValidators = (bool) $useSitemapValidators;
+        $this->useSitemapValidators = (bool) $useSitemapValidators;
         return $this;
     }
 
     /**
-     * Returns whether sitemap should be validated using Zend_Validate_Sitemap_*
+     * Returns whether sitemap should be validated using Zend\Validate\Sitemap_*
      *
      * @return bool  whether sitemap should be validated using validators
      */
     public function getUseSitemapValidators()
     {
-        return $this->_useSitemapValidators;
+        return $this->useSitemapValidators;
     }
 
     /**
      * Sets whether sitemap should be schema validated when generated
      *
-     * @param  bool $schemaValidation               whether sitemap should
-     *                                              validated using XSD Schema
-     * @return Zend_View_Helper_Navigation_Sitemap  fluent interface, returns
-     *                                              self
+     * @param  bool $schemaValidation whether sitemap should validated using XSD Schema
+     * @returnSitemap  fluent interface, returns self
      */
     public function setUseSchemaValidation($schemaValidation)
     {
-        $this->_useSchemaValidation = (bool) $schemaValidation;
+        $this->useSchemaValidation = (bool) $schemaValidation;
         return $this;
     }
 
@@ -202,7 +198,7 @@ class Zend_View_Helper_Navigation_Sitemap
      */
     public function getUseSchemaValidation()
     {
-        return $this->_useSchemaValidation;
+        return $this->useSchemaValidation;
     }
 
     /**
@@ -210,29 +206,24 @@ class Zend_View_Helper_Navigation_Sitemap
      *
      * E.g. http://www.example.com
      *
-     * @param  string $serverUrl                    server URL to set (only
-     *                                              scheme and host)
-     * @throws Zend_Uri_Exception                   if invalid server URL
-     * @return Zend_View_Helper_Navigation_Sitemap  fluent interface, returns
-     *                                              self
+     * @param  string $serverUrl server URL to set (only scheme and host)
+     * @return Sitemap fluent interface, returns self
+     * @throws Exception\InvalidArgumentException if invalid server URL
      */
     public function setServerUrl($serverUrl)
     {
-        require_once 'Zend/Uri.php';
-        $uri = Zend_Uri::factory($serverUrl);
+        $uri = Uri\UriFactory::factory($serverUrl);
         $uri->setFragment('');
         $uri->setPath('');
         $uri->setQuery('');
 
-        if ($uri->valid()) {
-            $this->_serverUrl = $uri->getUri();
+        if ($uri->isValid()) {
+            $this->serverUrl = $uri->toString();
         } else {
-            require_once 'Zend/Uri/Exception.php';
-            $e = new Zend_Uri_Exception(sprintf(
-                    'Invalid server URL: "%s"',
-                    $serverUrl));
-            $e->setView($this->view);
-            throw $e;
+            throw new Exception\InvalidArgumentException(sprintf(
+                'Invalid server URL: "%s"',
+                $serverUrl
+            ));
         }
 
         return $this;
@@ -245,11 +236,12 @@ class Zend_View_Helper_Navigation_Sitemap
      */
     public function getServerUrl()
     {
-        if (!isset($this->_serverUrl)) {
-            $this->_serverUrl = $this->view->serverUrl();
+        if (!isset($this->serverUrl)) {
+            $serverUrlHelper  = $this->getView()->plugin('serverUrl');
+            $this->serverUrl = $serverUrlHelper();
         }
 
-        return $this->_serverUrl;
+        return $this->serverUrl;
     }
 
     // Helper methods:
@@ -260,24 +252,16 @@ class Zend_View_Helper_Navigation_Sitemap
      * @param  string $string  string to escape
      * @return string          escaped string
      */
-    protected function _xmlEscape($string)
+    protected function xmlEscape($string)
     {
         $enc = 'UTF-8';
-        if ($this->view instanceof Zend_View_Interface
+        if ($this->view instanceof View\Renderer\RendererInterface
             && method_exists($this->view, 'getEncoding')
         ) {
             $enc = $this->view->getEncoding();
         }
 
-        // TODO: remove check when minimum PHP version is >= 5.2.3
-        if (version_compare(PHP_VERSION, '5.2.3', '>=')) {
-            // do not encode existing HTML entities
-            return htmlspecialchars($string, ENT_QUOTES, $enc, false);
-        } else {
-            $string = preg_replace('/&(?!(?:#\d++|[a-z]++);)/ui', '&amp;', $string);
-            $string = str_replace(array('<', '>', '\'', '"'), array('&lt;', '&gt;', '&#39;', '&quot;'), $string);
-            return $string;
-        }
+        return htmlspecialchars($string, ENT_QUOTES, $enc, false);
     }
 
     // Public methods:
@@ -285,10 +269,10 @@ class Zend_View_Helper_Navigation_Sitemap
     /**
      * Returns an escaped absolute URL for the given page
      *
-     * @param  Zend_Navigation_Page $page  page to get URL from
+     * @param  AbstractPage $page  page to get URL from
      * @return string
      */
-    public function url(Zend_Navigation_Page $page)
+    public function url(AbstractPage $page)
     {
         $href = $page->getHref();
 
@@ -303,48 +287,55 @@ class Zend_View_Helper_Navigation_Sitemap
             $url = (string) $href;
         } else {
             // href is relative to current document; use url helpers
-            $url = $this->getServerUrl()
-                 . rtrim($this->view->url(), '/') . '/'
-                 . $href;
+            $basePathHelper = $this->getView()->plugin('basepath');
+            $curDoc         = $basePathHelper();
+            $curDoc         = ('/' == $curDoc) ? '' : trim($curDoc, '/');
+            $url            = rtrim($this->getServerUrl(), '/') . '/'
+                                                                . $curDoc
+                                                                . (empty($curDoc) ? '' : '/') . $href;
         }
 
-        return $this->_xmlEscape($url);
+        if (! in_array($url, $this->urls)) {
+
+            $this->urls[] = $url;
+            return $this->xmlEscape($url);
+        }
+
+        return null;
     }
 
     /**
      * Returns a DOMDocument containing the Sitemap XML for the given container
      *
-     * @param  Zend_Navigation_Container $container  [optional] container to get
+     * @param  AbstractContainer                 $container  [optional] container to get
      *                                               breadcrumbs from, defaults
      *                                               to what is registered in the
      *                                               helper
      * @return DOMDocument                           DOM representation of the
      *                                               container
-     * @throws Zend_View_Exception                   if schema validation is on
+     * @throws Exception\RuntimeException            if schema validation is on
      *                                               and the sitemap is invalid
      *                                               according to the sitemap
      *                                               schema, or if sitemap
      *                                               validators are used and the
      *                                               loc element fails validation
      */
-    public function getDomSitemap(Zend_Navigation_Container $container = null)
+    public function getDomSitemap(AbstractContainer $container = null)
     {
+        // Reset the urls
+        $this->urls = array();
+
         if (null === $container) {
             $container = $this->getContainer();
         }
 
         // check if we should validate using our own validators
         if ($this->getUseSitemapValidators()) {
-            require_once 'Zend/Validate/Sitemap/Changefreq.php';
-            require_once 'Zend/Validate/Sitemap/Lastmod.php';
-            require_once 'Zend/Validate/Sitemap/Loc.php';
-            require_once 'Zend/Validate/Sitemap/Priority.php';
-
             // create validators
-            $locValidator        = new Zend_Validate_Sitemap_Loc();
-            $lastmodValidator    = new Zend_Validate_Sitemap_Lastmod();
-            $changefreqValidator = new Zend_Validate_Sitemap_Changefreq();
-            $priorityValidator   = new Zend_Validate_Sitemap_Priority();
+            $locValidator        = new \Zend\Validator\Sitemap\Loc();
+            $lastmodValidator    = new \Zend\Validator\Sitemap\Lastmod();
+            $changefreqValidator = new \Zend\Validator\Sitemap\Changefreq();
+            $priorityValidator   = new \Zend\Validator\Sitemap\Priority();
         }
 
         // create document
@@ -378,6 +369,7 @@ class Zend_View_Helper_Navigation_Sitemap
             // get absolute url from page
             if (!$url = $this->url($page)) {
                 // skip page if it has no url (rare case)
+                // or already is in the sitemap
                 continue;
             }
 
@@ -385,19 +377,18 @@ class Zend_View_Helper_Navigation_Sitemap
             $urlNode = $dom->createElementNS(self::SITEMAP_NS, 'url');
             $urlSet->appendChild($urlNode);
 
-            if ($this->getUseSitemapValidators() &&
-                !$locValidator->isValid($url)) {
-                require_once 'Zend/View/Exception.php';
-                $e = new Zend_View_Exception(sprintf(
-                        'Encountered an invalid URL for Sitemap XML: "%s"',
-                        $url));
-                $e->setView($this->view);
-                throw $e;
+            if ($this->getUseSitemapValidators()
+                && !$locValidator->isValid($url)
+            ) {
+                throw new Exception\RuntimeException(sprintf(
+                    'Encountered an invalid URL for Sitemap XML: "%s"',
+                    $url
+                ));
             }
 
             // put url in 'loc' element
             $urlNode->appendChild($dom->createElementNS(self::SITEMAP_NS,
-                                                        'loc', $url));
+                    'loc', $url));
 
             // add 'lastmod' element if a valid lastmod is set in page
             if (isset($page->lastmod)) {
@@ -412,7 +403,7 @@ class Zend_View_Helper_Navigation_Sitemap
                     $lastmodValidator->isValid($lastmod)) {
                     $urlNode->appendChild(
                         $dom->createElementNS(self::SITEMAP_NS, 'lastmod',
-                                              $lastmod)
+                            $lastmod)
                     );
                 }
             }
@@ -424,7 +415,7 @@ class Zend_View_Helper_Navigation_Sitemap
                     $changefreqValidator->isValid($changefreq)) {
                     $urlNode->appendChild(
                         $dom->createElementNS(self::SITEMAP_NS, 'changefreq',
-                                              $changefreq)
+                            $changefreq)
                     );
                 }
             }
@@ -436,7 +427,7 @@ class Zend_View_Helper_Navigation_Sitemap
                     $priorityValidator->isValid($priority)) {
                     $urlNode->appendChild(
                         $dom->createElementNS(self::SITEMAP_NS, 'priority',
-                                              $priority)
+                            $priority)
                     );
                 }
             }
@@ -445,12 +436,10 @@ class Zend_View_Helper_Navigation_Sitemap
         // validate using schema if specified
         if ($this->getUseSchemaValidation()) {
             if (!@$dom->schemaValidate(self::SITEMAP_XSD)) {
-                require_once 'Zend/View/Exception.php';
-                $e = new Zend_View_Exception(sprintf(
-                        'Sitemap is invalid according to XML Schema at "%s"',
-                        self::SITEMAP_XSD));
-                $e->setView($this->view);
-                throw $e;
+                throw new Exception\RuntimeException(sprintf(
+                    'Sitemap is invalid according to XML Schema at "%s"',
+                    self::SITEMAP_XSD
+                ));
             }
         }
 
@@ -462,21 +451,19 @@ class Zend_View_Helper_Navigation_Sitemap
     /**
      * Renders helper
      *
-     * Implements {@link Zend_View_Helper_Navigation_Helper::render()}.
+     * Implements {@link HelperInterface::render()}.
      *
-     * @param  Zend_Navigation_Container $container  [optional] container to
-     *                                               render. Default is to
-     *                                               render the container
-     *                                               registered in the helper.
-     * @return string                                helper output
+     * @param  link|AbstractContainer $container [optional] container to render. Default is
+     *                              to render the container registered in the
+     *                              helper.
+     * @return string               helper output
      */
-    public function render(Zend_Navigation_Container $container = null)
+    public function render($container = null)
     {
         $dom = $this->getDomSitemap($container);
-
         $xml = $this->getUseXmlDeclaration() ?
-               $dom->saveXML() :
-               $dom->saveXML($dom->documentElement);
+            $dom->saveXML() :
+            $dom->saveXML($dom->documentElement);
 
         return rtrim($xml, PHP_EOL);
     }

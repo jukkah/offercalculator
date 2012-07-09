@@ -16,8 +16,11 @@
  * @package    Zend_Version
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Version.php 24990 2012-06-22 15:42:56Z matthew $
  */
+
+namespace Zend;
+
+use Zend\Json\Json;
 
 /**
  * Class to store and retrieve the version of Zend Framework.
@@ -27,19 +30,19 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-final class Zend_Version
+final class Version
 {
     /**
      * Zend Framework version identification - see compareVersion()
      */
-    const VERSION = '1.11.12';
+    const VERSION = '2.0.0beta5';
 
     /**
      * The latest stable version Zend Framework available
      *
      * @var string
      */
-    protected static $_latestVersion;
+    protected static $latestVersion;
 
     /**
      * Compare the specified Zend Framework version string $version
@@ -59,23 +62,48 @@ final class Zend_Version
     }
 
     /**
-     * Fetches the version of the latest stable release
+     * Fetches the version of the latest stable release.
      *
-     * @link http://framework.zend.com/download/latest
+     * This uses the GitHub API (v3) and only returns refs that begin with 
+     * 'tags/release-'. Because GitHub returns the refs in alphabetical order, 
+     * we need to reduce the array to a single value, comparing the version 
+     * numbers with version_compare().
+     *
+     * @see http://developer.github.com/v3/git/refs/#get-all-references
+     * @link https://api.github.com/repos/zendframework/zf2/git/refs/tags/release-
      * @return string
      */
     public static function getLatest()
     {
-        if (null === self::$_latestVersion) {
-            self::$_latestVersion = 'not available';
+        if (null === self::$latestVersion) {
+            self::$latestVersion = 'not available';
+            $url  = 'https://api.github.com/repos/zendframework/zf2/git/refs/tags/release-';
 
-            $handle = fopen('http://framework.zend.com/api/zf-version', 'r');
-            if (false !== $handle) {
-                self::$_latestVersion = stream_get_contents($handle);
-                fclose($handle);
-            }
+            $apiResponse = Json::decode(file_get_contents($url), Json::TYPE_ARRAY);
+
+            // Simplify the API response into a simple array of version numbers 
+            $tags = array_map(function($tag){
+                return substr($tag['ref'], 18); // Reliable because we're filtering on 'refs/tags/release-'
+            }, $apiResponse);
+
+            // Fetch the latest version number from the array
+            self::$latestVersion = array_reduce($tags, function($a, $b) {
+                return version_compare($a, $b, '>') ? $a : $b;
+            });
         }
 
-        return self::$_latestVersion;
+        return self::$latestVersion;
+    }
+
+    /**
+     * Returns true if the running version of Zend Framework is
+     * the latest (or newer??) than the latest tag on GitHub,
+     * which is returned by static::getLatest(). 
+     * 
+     * @return boolean
+     */
+    public static function isLatest()
+    {
+        return static::compareVersion(static::getLatest()) < 1;
     }
 }

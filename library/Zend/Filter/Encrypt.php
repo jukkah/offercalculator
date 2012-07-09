@@ -16,18 +16,12 @@
  * @package    Zend_Filter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Encrypt.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Filter_Interface
- */
-require_once 'Zend/Filter/Interface.php';
+namespace Zend\Filter;
 
-/**
- * @see Zend_Loader
- */
-require_once 'Zend/Loader.php';
+use Traversable;
+use Zend\Stdlib\ArrayUtils;
 
 /**
  * Encrypts a given string
@@ -37,7 +31,7 @@ require_once 'Zend/Loader.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Filter_Encrypt implements Zend_Filter_Interface
+class Encrypt extends AbstractFilter
 {
     /**
      * Encryption adapter
@@ -47,12 +41,12 @@ class Zend_Filter_Encrypt implements Zend_Filter_Interface
     /**
      * Class constructor
      *
-     * @param string|array $options (Optional) Options to set, if null mcrypt is used
+     * @param string|array|Traversable $options (Optional) Options to set, if null mcrypt is used
      */
     public function __construct($options = null)
     {
-        if ($options instanceof Zend_Config) {
-            $options = $options->toArray();
+        if ($options instanceof Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
         }
 
         $this->setAdapter($options);
@@ -72,7 +66,8 @@ class Zend_Filter_Encrypt implements Zend_Filter_Interface
      * Sets new encryption options
      *
      * @param  string|array $options (Optional) Encryption options
-     * @return Zend_Filter_Encrypt
+     * @return Encrypt
+     * @throws Exception\InvalidArgumentException
      */
     public function setAdapter($options = null)
     {
@@ -89,18 +84,23 @@ class Zend_Filter_Encrypt implements Zend_Filter_Interface
             $options = array();
         }
 
-        if (Zend_Loader::isReadable('Zend/Filter/Encrypt/' . ucfirst($adapter). '.php')) {
-            $adapter = 'Zend_Filter_Encrypt_' . ucfirst($adapter);
+        if (stream_resolve_include_path('Zend/Filter/Encrypt/' . ucfirst($adapter). '.php')) {
+            $adapter = 'Zend\\Filter\\Encrypt\\' . ucfirst($adapter);
         }
 
         if (!class_exists($adapter)) {
-            Zend_Loader::loadClass($adapter);
+            throw new Exception\DomainException(
+                sprintf('%s expects a valid registry class name; received "%s", which did not resolve',
+                        __METHOD__,
+                        $adapter
+                ));
         }
 
         $this->_adapter = new $adapter($options);
-        if (!$this->_adapter instanceof Zend_Filter_Encrypt_Interface) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception("Encoding adapter '" . $adapter . "' does not implement Zend_Filter_Encrypt_Interface");
+        if (!$this->_adapter instanceof Encrypt\EncryptionAlgorithmInterface) {
+            throw new Exception\InvalidArgumentException(
+                "Encoding adapter '" . $adapter
+                . "' does not implement Zend\\Filter\\Encrypt\\EncryptionAlgorithmInterface");
         }
 
         return $this;
@@ -111,20 +111,20 @@ class Zend_Filter_Encrypt implements Zend_Filter_Interface
      *
      * @param string       $method  Method to call
      * @param string|array $options Options for this method
+     * @throws Exception\BadMethodCallException
      */
     public function __call($method, $options)
     {
         $part = substr($method, 0, 3);
         if ((($part != 'get') and ($part != 'set')) or !method_exists($this->_adapter, $method)) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception("Unknown method '{$method}'");
+            throw new Exception\BadMethodCallException("Unknown method '{$method}'");
         }
 
         return call_user_func_array(array($this->_adapter, $method), $options);
     }
 
     /**
-     * Defined by Zend_Filter_Interface
+     * Defined by Zend\Filter\Filter
      *
      * Encrypts the content $value with the defined settings
      *

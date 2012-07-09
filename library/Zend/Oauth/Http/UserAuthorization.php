@@ -13,25 +13,23 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: UserAuthorization.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** Zend_Oauth_Http */
-require_once 'Zend/Oauth/Http.php';
+namespace Zend\OAuth\Http;
 
-/** Zend_Uri_Http */
-require_once 'Zend/Uri/Http.php';
+use Zend\OAuth\Http as HTTPClient;
+use Zend\Uri;
 
 /**
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Oauth_Http_UserAuthorization extends Zend_Oauth_Http
+class UserAuthorization extends HTTPClient
 {
     /**
      * Generate a redirect URL from the allowable parameters and configured
@@ -42,13 +40,13 @@ class Zend_Oauth_Http_UserAuthorization extends Zend_Oauth_Http
     public function getUrl()
     {
         $params = $this->assembleParams();
-        $uri    = Zend_Uri_Http::fromString($this->_consumer->getUserAuthorizationUrl());
+        $uri    = Uri\UriFactory::factory($this->_consumer->getUserAuthorizationUrl());
 
         $uri->setQuery(
             $this->_httpUtility->toEncodedQueryString($params)
         );
 
-        return $uri->getUri();
+        return $uri->toString();
     }
 
     /**
@@ -62,7 +60,7 @@ class Zend_Oauth_Http_UserAuthorization extends Zend_Oauth_Http
             'oauth_token' => $this->_consumer->getLastRequestToken()->getToken(),
         );
 
-        if (!Zend_Oauth_Client::$supportsRevisionA) {
+        if (!\Zend\OAuth\Client::$supportsRevisionA) {
             $callback = $this->_consumer->getCallbackUrl();
             if (!empty($callback)) {
                 $params['oauth_callback'] = $callback;

@@ -1,28 +1,14 @@
 <?php
 /**
- * Zend Framework
+ * Zend Framework (http://framework.zend.com/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://framework.zend.com/license/new-bsd
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
- *
- * @category   Zend
- * @package    Zend_Paginator
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Null.php 24594 2012-01-05 21:27:01Z matthew $
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
+ * @package   Zend_Paginator
  */
 
-/**
- * @see Zend_Paginator_Adapter_Interface
- */
-require_once 'Zend/Paginator/Adapter/Interface.php';
+namespace Zend\Paginator\Adapter;
 
 /**
  * @category   Zend
@@ -30,7 +16,7 @@ require_once 'Zend/Paginator/Adapter/Interface.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Paginator_Adapter_Null implements Zend_Paginator_Adapter_Interface
+class Null implements AdapterInterface
 {
     /**
      * Item count
@@ -42,7 +28,7 @@ class Zend_Paginator_Adapter_Null implements Zend_Paginator_Adapter_Interface
     /**
      * Constructor.
      *
-     * @param array $count Total item count
+     * @param integer $count Total item count (Optional)
      */
     public function __construct($count = 0)
     {

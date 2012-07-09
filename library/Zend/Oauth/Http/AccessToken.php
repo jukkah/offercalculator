@@ -13,43 +13,41 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: AccessToken.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** Zend_Oauth_Http */
-require_once 'Zend/Oauth/Http.php';
-
-/** Zend_Oauth_Token_Access */
-require_once 'Zend/Oauth/Token/Access.php';
+namespace Zend\OAuth\Http;
+use Zend\OAuth\Http as HTTPClient;
+use Zend\OAuth;
+use Zend\Http;
 
 /**
  * @category   Zend
- * @package    Zend_Oauth
+ * @package    Zend_OAuth
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
+class AccessToken extends HTTPClient
 {
     /**
      * Singleton instance if required of the HTTP client
      *
-     * @var Zend_Http_Client
+     * @var \Zend\Http\Client
      */
     protected $_httpClient = null;
 
     /**
      * Initiate a HTTP request to retrieve an Access Token.
      *
-     * @return Zend_Oauth_Token_Access
+     * @return \Zend\OAuth\Token\Access
      */
     public function execute()
     {
         $params   = $this->assembleParams();
         $response = $this->startRequestCycle($params);
-        $return   = new Zend_Oauth_Token_Access($response);
+        $return   = new OAuth\Token\Access($response);
         return $return;
     }
 
@@ -90,16 +88,16 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
      * specified by OAuth, for use in requesting an Access Token.
      *
      * @param  array $params
-     * @return Zend_Http_Client
+     * @return Zend\Http\Client
      */
     public function getRequestSchemeHeaderClient(array $params)
     {
         $params      = $this->_cleanParamsOfIllegalCustomParameters($params);
         $headerValue = $this->_toAuthorizationHeader($params);
-        $client      = Zend_Oauth::getHttpClient();
+        $client      = OAuth\OAuth::getHttpClient();
 
         $client->setUri($this->_consumer->getAccessTokenUrl());
-        $client->setHeaders('Authorization', $headerValue);
+        $client->setHeaders(array('Authorization' =>  $headerValue));
         $client->setMethod($this->_preferredRequestMethod);
 
         return $client;
@@ -110,21 +108,18 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
      * Scheme specified by OAuth, for use in requesting an Access Token.
      *
      * @param  array $params
-     * @return Zend_Http_Client
+     * @return Zend\Http\Client
      */
     public function getRequestSchemePostBodyClient(array $params)
     {
         $params = $this->_cleanParamsOfIllegalCustomParameters($params);
-        $client = Zend_Oauth::getHttpClient();
+        $client = OAuth\OAuth::getHttpClient();
         $client->setUri($this->_consumer->getAccessTokenUrl());
         $client->setMethod($this->_preferredRequestMethod);
-        $client->setRawData(
+        $client->setRawBody(
             $this->_httpUtility->toEncodedQueryString($params)
         );
-        $client->setHeaders(
-            Zend_Http_Client::CONTENT_TYPE,
-            Zend_Http_Client::ENC_URLENCODED
-        );
+        $client->setHeaders(array('ContentType' => Http\Client::ENC_URLENCODED));
         return $client;
     }
 
@@ -134,36 +129,12 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
      *
      * @param  array $params
      * @param  string $url
-     * @return Zend_Http_Client
+     * @return Zend\Http\Client
      */
     public function getRequestSchemeQueryStringClient(array $params, $url)
     {
         $params = $this->_cleanParamsOfIllegalCustomParameters($params);
         return parent::getRequestSchemeQueryStringClient($params, $url);
-    }
-
-    /**
-     * Attempt a request based on the current configured OAuth Request Scheme and
-     * return the resulting HTTP Response.
-     *
-     * @param  array $params
-     * @return Zend_Http_Response
-     */
-    protected function _attemptRequest(array $params)
-    {
-        switch ($this->_preferredRequestScheme) {
-            case Zend_Oauth::REQUEST_SCHEME_HEADER:
-                $httpClient = $this->getRequestSchemeHeaderClient($params);
-                break;
-            case Zend_Oauth::REQUEST_SCHEME_POSTBODY:
-                $httpClient = $this->getRequestSchemePostBodyClient($params);
-                break;
-            case Zend_Oauth::REQUEST_SCHEME_QUERYSTRING:
-                $httpClient = $this->getRequestSchemeQueryStringClient($params,
-                    $this->_consumer->getAccessTokenUrl());
-                break;
-        }
-        return $httpClient->request();
     }
 
     /**

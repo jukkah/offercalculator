@@ -16,18 +16,19 @@
  * @package   Zend_Text
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
- * @version   $Id: MultiByte.php 24763 2012-05-06 00:11:18Z adamlundrigan $
  */
 
+namespace Zend\Text;
+
 /**
- * Zend_Text_MultiByte contains multibyte safe string methods
+ * Contains multibyte safe string methods
  *
  * @category  Zend
  * @package   Zend_Text
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Text_MultiByte
+class MultiByte
 {
     /**
      * Word wrap
@@ -43,13 +44,17 @@ class Zend_Text_MultiByte
     {
         $stringWidth = iconv_strlen($string, $charset);
         $breakWidth  = iconv_strlen($break, $charset);
-        
+
         if (strlen($string) === 0) {
             return '';
-        } elseif ($breakWidth === null) {
-            throw new Zend_Text_Exception('Break string cannot be empty');
-        } elseif ($width === 0 && $cut) {
-            throw new Zend_Text_Exception('Can\'t force cut when width is zero');
+        } 
+
+        if ($breakWidth === null) {
+            throw new Exception\InvalidArgumentException('Break string cannot be empty');
+        } 
+
+        if ($width === 0 && $cut) {
+            throw new Exception\InvalidArgumentException('Cannot force cut when width is zero');
         }
         
         $result    = '';
@@ -58,9 +63,8 @@ class Zend_Text_MultiByte
         for ($current = 0; $current < $stringWidth; $current++) {
             $char = iconv_substr($string, $current, 1, $charset);
             
-            if ($breakWidth === 1) {
-                $possibleBreak = $char;
-            } else {
+            $possibleBreak = $char;
+            if ($breakWidth !== 1) {
                 $possibleBreak = iconv_substr($string, $current, $breakWidth, $charset);
             }
             
@@ -68,19 +72,29 @@ class Zend_Text_MultiByte
                 $result    .= iconv_substr($string, $lastStart, $current - $lastStart + $breakWidth, $charset);
                 $current   += $breakWidth - 1;
                 $lastStart  = $lastSpace = $current + 1;
-            } elseif ($char === ' ') {
+                continue;
+            } 
+
+            if ($char === ' ') {
                 if ($current - $lastStart >= $width) {
                     $result    .= iconv_substr($string, $lastStart, $current - $lastStart, $charset) . $break;
                     $lastStart  = $current + 1;
                 }
                 
                 $lastSpace = $current;
-            } elseif ($current - $lastStart >= $width && $cut && $lastStart >= $lastSpace) {
+                continue;
+            } 
+
+            if ($current - $lastStart >= $width && $cut && $lastStart >= $lastSpace) {
                 $result    .= iconv_substr($string, $lastStart, $current - $lastStart, $charset) . $break;
                 $lastStart  = $lastSpace = $current;
-            } elseif ($current - $lastStart >= $width && $lastStart < $lastSpace) {
+                continue;
+            } 
+
+            if ($current - $lastStart >= $width && $lastStart < $lastSpace) {
                 $result    .= iconv_substr($string, $lastStart, $lastSpace - $lastStart, $charset) . $break;
                 $lastStart  = $lastSpace = $lastSpace + 1;
+                continue;
             }
         }
         

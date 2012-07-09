@@ -17,11 +17,12 @@
  * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Wddx.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** @see Zend_Serializer_Adapter_AdapterAbstract */
-require_once 'Zend/Serializer/Adapter/AdapterAbstract.php';
+namespace Zend\Serializer\Adapter;
+
+use Zend\Serializer\Exception\RuntimeException,
+    Zend\Serializer\Exception\ExtensionNotLoadedException;
 
 /**
  * @link       http://www.infoloom.com/gcaconfs/WEB/chicago98/simeonov.HTM
@@ -32,7 +33,7 @@ require_once 'Zend/Serializer/Adapter/AdapterAbstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Serializer_Adapter_Wddx extends Zend_Serializer_Adapter_AdapterAbstract
+class Wddx extends AbstractAdapter
 {
     /**
      * @var array Default options
@@ -43,28 +44,27 @@ class Zend_Serializer_Adapter_Wddx extends Zend_Serializer_Adapter_AdapterAbstra
 
     /**
      * Constructor
-     *
-     * @param  array $opts
+     * 
+     * @param  array $options
      * @return void
-     * @throws Zend_Serializer_Exception if wddx extension not found
+     * @throws ExtensionNotLoadedException if wddx extension not found
      */
-    public function __construct($opts = array())
+    public function __construct($options = array())
     {
         if (!extension_loaded('wddx')) {
-            require_once 'Zend/Serializer/Exception.php';
-            throw new Zend_Serializer_Exception('PHP extension "wddx" is required for this adapter');
+            throw new ExtensionNotLoadedException('PHP extension "wddx" is required for this adapter');
         }
 
-        parent::__construct($opts);
+        parent::__construct($options);
     }
 
     /**
      * Serialize PHP to WDDX
-     *
-     * @param  mixed $value
-     * @param  array $opts
+     * 
+     * @param  mixed $value 
+     * @param  array $opts 
      * @return string
-     * @throws Zend_Serializer_Exception on wddx error
+     * @throws RuntimeException on wddx error
      */
     public function serialize($value, array $opts = array())
     {
@@ -78,39 +78,35 @@ class Zend_Serializer_Adapter_Wddx extends Zend_Serializer_Adapter_AdapterAbstra
 
         if ($wddx === false) {
             $lastErr = error_get_last();
-            require_once 'Zend/Serializer/Exception.php';
-            throw new Zend_Serializer_Exception($lastErr['message']);
+            throw new RuntimeException($lastErr['message']);
         }
         return $wddx;
     }
 
     /**
      * Unserialize from WDDX to PHP
-     *
-     * @param  string $wddx
-     * @param  array $opts
+     * 
+     * @param  string $wddx 
+     * @param  array $opts 
      * @return mixed
-     * @throws Zend_Serializer_Exception on wddx error
+     * @throws RuntimeException on wddx error
      */
     public function unserialize($wddx, array $opts = array())
     {
         $ret = wddx_deserialize($wddx);
 
-        if ($ret === null) {
+        if ($ret === null && class_exists('SimpleXMLElement', false)) {
             // check if the returned NULL is valid
             // or based on an invalid wddx string
             try {
-                $simpleXml = new SimpleXMLElement($wddx);
+                $simpleXml = new \SimpleXMLElement($wddx);
                 if (isset($simpleXml->data[0]->null[0])) {
                     return null; // valid null
                 }
-                $errMsg = 'Can\'t unserialize wddx string';
-            } catch (Exception $e) {
-                $errMsg = $e->getMessage();
+                throw new RuntimeException('Invalid wddx');
+            } catch (\Exception $e) {
+                throw new RuntimeException($e->getMessage(), 0, $e);
             }
-
-            require_once 'Zend/Serializer/Exception.php';
-            throw new Zend_Serializer_Exception($errMsg);
         }
 
         return $ret;

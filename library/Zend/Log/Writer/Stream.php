@@ -17,14 +17,12 @@
  * @subpackage Writer
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Stream.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** Zend_Log_Writer_Abstract */
-require_once 'Zend/Log/Writer/Abstract.php';
+namespace Zend\Log\Writer;
 
-/** Zend_Log_Formatter_Simple */
-require_once 'Zend/Log/Formatter/Simple.php';
+use Zend\Log\Formatter\Simple as SimpleFormatter;
+use Zend\Log\Exception;
 
 /**
  * @category   Zend
@@ -32,79 +30,79 @@ require_once 'Zend/Log/Formatter/Simple.php';
  * @subpackage Writer
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Stream.php 24594 2012-01-05 21:27:01Z matthew $
  */
-class Zend_Log_Writer_Stream extends Zend_Log_Writer_Abstract
+class Stream extends AbstractWriter
 {
     /**
      * Holds the PHP stream to log to.
      *
      * @var null|stream
      */
-    protected $_stream = null;
+    protected $stream = null;
 
     /**
-     * Class Constructor
+     * Constructor
      *
      * @param array|string|resource $streamOrUrl Stream or URL to open as a stream
      * @param string|null $mode Mode, only applicable if a URL is given
-     * @return void
-     * @throws Zend_Log_Exception
+     * @return Stream
+     * @throws Exception\InvalidArgumentException
+     * @throws Exception\RuntimeException
      */
     public function __construct($streamOrUrl, $mode = null)
     {
-        // Setting the default
+        // Setting the default mode
         if (null === $mode) {
             $mode = 'a';
         }
 
         if (is_resource($streamOrUrl)) {
-            if (get_resource_type($streamOrUrl) != 'stream') {
-                require_once 'Zend/Log/Exception.php';
-                throw new Zend_Log_Exception('Resource is not a stream');
+            if ('stream' != get_resource_type($streamOrUrl)) {
+                throw new Exception\InvalidArgumentException(sprintf(
+                    'Resource is not a stream; received "%s',
+                    get_resource_type($streamOrUrl)
+                ));
             }
 
-            if ($mode != 'a') {
-                require_once 'Zend/Log/Exception.php';
-                throw new Zend_Log_Exception('Mode cannot be changed on existing streams');
+            if ('a' != $mode) {
+                throw new Exception\InvalidArgumentException(sprintf(
+                    'Mode must be "a" on existing streams; received "%s"',
+                    $mode
+                ));
             }
 
-            $this->_stream = $streamOrUrl;
+            $this->stream = $streamOrUrl;
         } else {
             if (is_array($streamOrUrl) && isset($streamOrUrl['stream'])) {
                 $streamOrUrl = $streamOrUrl['stream'];
             }
 
-            if (! $this->_stream = @fopen($streamOrUrl, $mode, false)) {
-                require_once 'Zend/Log/Exception.php';
-                $msg = "\"$streamOrUrl\" cannot be opened with mode \"$mode\"";
-                throw new Zend_Log_Exception($msg);
+            if (! $this->stream = @fopen($streamOrUrl, $mode, false)) {
+                throw new Exception\RuntimeException(sprintf(
+                    '"%s" cannot be opened with mode "%s"',
+                    $streamOrUrl,
+                    $mode
+                ));
             }
         }
 
-        $this->_formatter = new Zend_Log_Formatter_Simple();
+        $this->formatter = new SimpleFormatter();
     }
 
     /**
-     * Create a new instance of Zend_Log_Writer_Stream
+     * Write a message to the log.
      *
-     * @param  array|Zend_Config $config
-     * @return Zend_Log_Writer_Stream
+     * @param array $event event data
+     * @return void
+     * @throws Exception\RuntimeException
      */
-    static public function factory($config)
+    protected function doWrite(array $event)
     {
-        $config = self::_parseConfig($config);
-        $config = array_merge(array(
-            'stream' => null,
-            'mode'   => null,
-        ), $config);
+        $line = $this->formatter->format($event);
 
-        $streamOrUrl = isset($config['url']) ? $config['url'] : $config['stream'];
-
-        return new self(
-            $streamOrUrl,
-            $config['mode']
-        );
+        if (false === @fwrite($this->stream, $line)) {
+            throw new Exception\RuntimeException("Unable to write to stream");
+        }
     }
 
     /**
@@ -114,25 +112,8 @@ class Zend_Log_Writer_Stream extends Zend_Log_Writer_Abstract
      */
     public function shutdown()
     {
-        if (is_resource($this->_stream)) {
-            fclose($this->_stream);
-        }
-    }
-
-    /**
-     * Write a message to the log.
-     *
-     * @param  array  $event  event data
-     * @return void
-     * @throws Zend_Log_Exception
-     */
-    protected function _write($event)
-    {
-        $line = $this->_formatter->format($event);
-
-        if (false === @fwrite($this->_stream, $line)) {
-            require_once 'Zend/Log/Exception.php';
-            throw new Zend_Log_Exception("Unable to write to stream");
+        if (is_resource($this->stream)) {
+            fclose($this->stream);
         }
     }
 }

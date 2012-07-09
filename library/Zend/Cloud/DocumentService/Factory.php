@@ -19,7 +19,9 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-require_once 'Zend/Cloud/AbstractFactory.php';
+namespace Zend\Cloud\DocumentService;
+
+use Zend\Cloud\AbstractFactory;
 
 /**
  * Class implementing working with Azure queries in a structured way
@@ -32,14 +34,14 @@ require_once 'Zend/Cloud/AbstractFactory.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Cloud_DocumentService_Factory extends Zend_Cloud_AbstractFactory
+class Factory extends AbstractFactory
 {
     const DOCUMENT_ADAPTER_KEY = 'document_adapter';
 
     /**
      * @var string Interface which adapter must implement to be considered valid
      */
-    protected static $_adapterInterface = 'Zend_Cloud_DocumentService_Adapter';
+    protected static $_adapterInterface = 'Zend\Cloud\DocumentService\Adapter\AdapterInterface';
 
     /**
      * Constructor
@@ -48,7 +50,7 @@ class Zend_Cloud_DocumentService_Factory extends Zend_Cloud_AbstractFactory
      */
     private function __construct()
     {
-        // private ctor - should not be used
+        // private constructor - should not be used
     }
 
     /**
@@ -61,14 +63,12 @@ class Zend_Cloud_DocumentService_Factory extends Zend_Cloud_AbstractFactory
     {
         $adapter = parent::_getAdapter(self::DOCUMENT_ADAPTER_KEY, $options);
         if (!$adapter) {
-            require_once 'Zend/Cloud/DocumentService/Exception.php';
-            throw new Zend_Cloud_DocumentService_Exception(
+            throw new Exception\InvalidArgumentException(
                 'Class must be specified using the \''
                 . self::DOCUMENT_ADAPTER_KEY . '\' key'
             );
         } elseif (!$adapter instanceof self::$_adapterInterface) {
-            require_once 'Zend/Cloud/DocumentService/Exception.php';
-            throw new Zend_Cloud_DocumentService_Exception(
+            throw new Exception\InvalidArgumentException(
                 'Adapter must implement \'' . self::$_adapterInterface . '\''
             );
         }

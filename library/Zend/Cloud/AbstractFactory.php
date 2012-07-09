@@ -18,15 +18,20 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+namespace Zend\Cloud;
+
+use Traversable;
+use Zend\Stdlib\ArrayUtils;
+
 /**
- * Abstract factory for Zend_Cloud resources
+ * Abstract factory for Zend\Cloud resources
  *
  * @category   Zend
  * @package    Zend_Cloud
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Cloud_AbstractFactory
+class AbstractFactory
 {
     /**
      * Constructor
@@ -35,20 +40,20 @@ class Zend_Cloud_AbstractFactory
      */
     private function __construct()
     {
-        // private ctor - should not be used
+        // private constructor - should not be used
     }
 
     /**
      * Get an individual adapter instance
      *
      * @param  string $adapterOption
-     * @param  array|Zend_Config $options
-     * @return null|Zend_Cloud_DocumentService_Adapter|Zend_Cloud_QueueService_Adapter|Zend_Cloud_StorageService_Adapter
+     * @param  array|Traversable $options
+     * @return null|DocumentService\Adapter\AdapterInterface|QueueService\Adapter\AdapterInterface|StorageService\Adapter\AdapterInterface|Infrastructure\Adapter\AdapterInterface
      */
     protected static function _getAdapter($adapterOption, $options)
     {
-        if ($options instanceof Zend_Config) {
-            $options = $options->toArray();
+        if ($options instanceof Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
         }
 
         if (!isset($options[$adapterOption])) {
@@ -57,10 +62,6 @@ class Zend_Cloud_AbstractFactory
 
         $classname = $options[$adapterOption];
         unset($options[$adapterOption]);
-        if (!class_exists($classname)) {
-            require_once 'Zend/Loader.php';
-            Zend_Loader::loadClass($classname);
-        }
 
         return new $classname($options);
     }

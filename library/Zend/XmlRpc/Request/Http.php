@@ -13,15 +13,15 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Controller
+ * @package    Zend_XmlRpc
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/**
- * Zend_XmlRpc_Request
- */
-require_once 'Zend/XmlRpc/Request.php';
+namespace Zend\XmlRpc\Request;
+
+use Zend\XmlRpc\Request as XmlRpcRequest;
+use Zend\XmlRpc\Fault;
 
 /**
  * XmlRpc Request object -- Request via HTTP
@@ -30,13 +30,12 @@ require_once 'Zend/XmlRpc/Request.php';
  * built at construction time using a raw POST; if no data is available, the
  * request is declared a fault.
  *
- * @category Zend
- * @package  Zend_XmlRpc
+ * @category   Zend
+ * @package    Zend_XmlRpc
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version $Id: Http.php 24594 2012-01-05 21:27:01Z matthew $
  */
-class Zend_XmlRpc_Request_Http extends Zend_XmlRpc_Request
+class Http extends XmlRpcRequest
 {
     /**
      * Array of headers
@@ -63,8 +62,7 @@ class Zend_XmlRpc_Request_Http extends Zend_XmlRpc_Request
     {
         $xml = @file_get_contents('php://input');
         if (!$xml) {
-            require_once 'Zend/XmlRpc/Fault.php';
-            $this->_fault = new Zend_XmlRpc_Fault(630);
+            $this->_fault = new Fault(630);
             return;
         }
 

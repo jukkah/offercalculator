@@ -16,18 +16,12 @@
  * @package    Zend_View
  * @subpackage Helper
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Registry.php 24594 2012-01-05 21:27:01Z matthew $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Registry */
-require_once 'Zend/Registry.php';
+namespace Zend\View\Helper\Placeholder;
 
-/** Zend_View_Helper_Placeholder_Container_Abstract */
-require_once 'Zend/View/Helper/Placeholder/Container/Abstract.php';
-
-/** Zend_View_Helper_Placeholder_Container */
-require_once 'Zend/View/Helper/Placeholder/Container.php';
+use Zend\View\Exception;
 
 /**
  * Registry for placeholder containers
@@ -37,19 +31,18 @@ require_once 'Zend/View/Helper/Placeholder/Container.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_Placeholder_Registry
+class Registry
 {
     /**
-     * Zend_Registry key under which placeholder registry exists
-     * @const string
+     * @var Registry Singleton instance 
      */
-    const REGISTRY_KEY = 'Zend_View_Helper_Placeholder_Registry';
+    protected static $instance;
 
     /**
      * Default container class
      * @var string
      */
-    protected $_containerClass = 'Zend_View_Helper_Placeholder_Container';
+    protected $_containerClass = 'Zend\View\Helper\Placeholder\Container';
 
     /**
      * Placeholder containers
@@ -58,20 +51,29 @@ class Zend_View_Helper_Placeholder_Registry
     protected $_items = array();
 
     /**
-     * Retrieve or create registry instnace
+     * Retrieve or create registry instance
      *
-     * @return void
+     * @return Registry
      */
     public static function getRegistry()
     {
-        if (Zend_Registry::isRegistered(self::REGISTRY_KEY)) {
-            $registry = Zend_Registry::get(self::REGISTRY_KEY);
-        } else {
-            $registry = new self();
-            Zend_Registry::set(self::REGISTRY_KEY, $registry);
+        if (null === static::$instance) {
+            static::$instance = new self();
         }
 
-        return $registry;
+        return static::$instance;
+    }
+
+    /**
+     * Unset the singleton
+     *
+     * Primarily useful for testing purposes; sets {@link $instance} to null.
+     * 
+     * @return void
+     */
+    public static function unsetRegistry()
+    {
+        static::$instance = null;
     }
 
     /**
@@ -79,7 +81,7 @@ class Zend_View_Helper_Placeholder_Registry
      *
      * @param  string $key
      * @param  array $value
-     * @return Zend_View_Helper_Placeholder_Container_Abstract
+     * @return Container\AbstractContainer
      */
     public function createContainer($key, array $value = array())
     {
@@ -93,7 +95,7 @@ class Zend_View_Helper_Placeholder_Registry
      * Retrieve a placeholder container
      *
      * @param  string $key
-     * @return Zend_View_Helper_Placeholder_Container_Abstract
+     * @return Container\AbstractContainer
      */
     public function getContainer($key)
     {
@@ -124,10 +126,10 @@ class Zend_View_Helper_Placeholder_Registry
      * Set the container for an item in the registry
      *
      * @param  string $key
-     * @param  Zend_View_Placeholder_Container_Abstract $container
-     * @return Zend_View_Placeholder_Registry
+     * @param  Container\AbstractContainer $container
+     * @return Registry
      */
-    public function setContainer($key, Zend_View_Helper_Placeholder_Container_Abstract $container)
+    public function setContainer($key, Container\AbstractContainer $container)
     {
         $key = (string) $key;
         $this->_items[$key] = $container;
@@ -155,21 +157,22 @@ class Zend_View_Helper_Placeholder_Registry
      * Set the container class to use
      *
      * @param  string $name
-     * @return Zend_View_Helper_Placeholder_Registry
+     * @throws Exception\InvalidArgumentException
+     * @throws Exception\DomainException
+     * @return Registry
      */
     public function setContainerClass($name)
     {
         if (!class_exists($name)) {
-            require_once 'Zend/Loader.php';
-            Zend_Loader::loadClass($name);
+            throw new Exception\DomainException(
+                sprintf('%s expects a valid registry class name; received "%s", which did not resolve',
+                        __METHOD__,
+                        $name
+                ));
         }
 
-        $reflection = new ReflectionClass($name);
-        if (!$reflection->isSubclassOf(new ReflectionClass('Zend_View_Helper_Placeholder_Container_Abstract'))) {
-            require_once 'Zend/View/Helper/Placeholder/Registry/Exception.php';
-            $e = new Zend_View_Helper_Placeholder_Registry_Exception('Invalid Container class specified');
-            $e->setView($this->view);
-            throw $e;
+        if (!in_array('Zend\View\Helper\Placeholder\Container\AbstractContainer', class_parents($name))) {
+            throw new Exception\InvalidArgumentException('Invalid Container class specified');
         }
 
         $this->_containerClass = $name;

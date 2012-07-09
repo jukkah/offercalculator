@@ -11,29 +11,33 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Cloud
- * @subpackage DocumentService
+ * @package    Zend_Cloud_DocumentService
+ * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-require_once 'Zend/Cloud/DocumentService/Adapter/AbstractAdapter.php';
-require_once 'Zend/Cloud/DocumentService/Adapter/WindowsAzure/Query.php';
-require_once 'Zend/Cloud/DocumentService/Exception.php';
-require_once 'Zend/Service/WindowsAzure/Storage/DynamicTableEntity.php';
-require_once 'Zend/Service/WindowsAzure/Storage/Table.php';
+namespace Zend\Cloud\DocumentService\Adapter;
+
+use Traversable;
+use Zend\Stdlib\ArrayUtils;
+use Zend\Cloud\DocumentService\Document,
+    Zend\Service\WindowsAzure\Exception as WindowsAzureException,
+    Zend\Service\WindowsAzure\Storage\Storage,
+    Zend\Service\WindowsAzure\Storage\Table,
+    Zend\Service\WindowsAzure\Storage\DynamicTableEntity;
+
 
 /**
- * SimpleDB adapter for document service.
+ * WindowsAzure adapter for document service.
  *
  * @category   Zend
- * @package    Zend_Cloud
- * @subpackage DocumentService
+ * @package    Zend_Cloud_DocumentService
+ * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Cloud_DocumentService_Adapter_WindowsAzure
-    extends Zend_Cloud_DocumentService_Adapter_AbstractAdapter
+class WindowsAzure extends AbstractAdapter
 {
     /*
      * Options array keys for the Azure adapter.
@@ -51,13 +55,13 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
     const VERIFY_ETAG           = "verify_etag";
     const TIMESTAMP_KEY         = "Timestamp";
 
-    const DEFAULT_HOST          = Zend_Service_WindowsAzure_Storage::URL_CLOUD_TABLE;
-    const DEFAULT_QUERY_CLASS   = 'Zend_Cloud_DocumentService_Adapter_WindowsAzure_Query';
+    const DEFAULT_HOST          = Storage::URL_CLOUD_TABLE;
+    const DEFAULT_QUERY_CLASS   = '\Zend\Cloud\DocumentService\Adapter\WindowsAzure\Query';
 
     /**
      * Azure  service instance.
      *
-     * @var Zend_Service_WindowsAzure_Storage_Table
+     * @var \Zend\Service\WindowsAzure\Storage\Table
      */
     protected $_storageClient;
 
@@ -66,7 +70,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      *
      * @var string
      */
-    protected $_queryClass = 'Zend_Cloud_DocumentService_Adapter_WindowsAzure_Query';
+    protected $_queryClass = '\Zend\Cloud\DocumentService\Adapter\WindowsAzure\Query';
 
     /**
      * Partition key to use by default when constructing document identifiers
@@ -77,13 +81,12 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
     /**
      * Constructor
      *
-     * @param array $options
-     * @return void
+     * @param array|Traversable $options
      */
     public function __construct($options = array())
     {
-        if ($options instanceof Zend_Config) {
-            $options = $options->toArray();
+        if ($options instanceof Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
         }
 
         if (empty($options)) {
@@ -91,7 +94,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
         }
 
         if (!is_array($options)) {
-            throw new Zend_Cloud_DocumentService_Exception('Invalid options provided');
+            throw new Exception\InvalidArgumentException('Invalid options provided');
         }
 
         if (isset($options[self::DOCUMENT_CLASS])) {
@@ -106,7 +109,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
             $this->setQueryClass($options[self::QUERY_CLASS]);
         }
 
-        // Build Zend_Service_WindowsAzure_Storage_Blob instance
+        // Build \Zend\Service\WindowsAzure\Storage\Blob instance
         if (!isset($options[self::HOST])) {
             $host = self::DEFAULT_HOST;
         } else {
@@ -114,16 +117,16 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
         }
 
         if (! isset($options[self::ACCOUNT_NAME])) {
-            throw new Zend_Cloud_DocumentService_Exception('No Windows Azure account name provided.');
+            throw new Exception\InvalidArgumentException('No Windows Azure account name provided.');
         }
 
         if (! isset($options[self::ACCOUNT_KEY])) {
-            throw new Zend_Cloud_DocumentService_Exception('No Windows Azure account key provided.');
+            throw new Exception\InvalidArgumentException('No Windows Azure account key provided.');
         }
 
         // TODO: support $usePathStyleUri and $retryPolicy
         try {
-            $this->_storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+            $this->_storageClient = new \Zend\Service\WindowsAzure\Storage\Table(
                     $host, $options[self::ACCOUNT_NAME], $options[self::ACCOUNT_KEY]);
             // Parse other options
             if (! empty($options[self::PROXY_HOST])) {
@@ -135,8 +138,8 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
             if (isset($options[self::HTTP_ADAPTER])) {
                 $this->_storageClient->setHttpClientChannel($options[self::HTTP_ADAPTER]);
             }
-        } catch(Zend_Service_WindowsAzure_Exception $e) {
-            throw new Zend_Cloud_DocumentService_Exception('Error on document service creation: '.$e->getMessage(), $e->getCode(), $e);
+        } catch(WindowsAzureException\ExceptionInterface $e) {
+            throw new Exception\RuntimeException('Error on document service creation: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -144,7 +147,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      * Set the default partition key
      *
      * @param  string $key
-     * @return Zend_Cloud_DocumentService_Adapter_WindowsAzure
+     * @return \Zend\Cloud\DocumentService\Adapter\WindowsAzure
      */
     public function setDefaultPartitionKey($key)
     {
@@ -173,13 +176,13 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
     public function createCollection($name, $options = null)
     {
         if (!preg_match('/^[A-Za-z][A-Za-z0-9]{2,}$/', $name)) {
-            throw new Zend_Cloud_DocumentService_Exception('Invalid collection name; Windows Azure collection names must consist of alphanumeric characters only, and be at least 3 characters long');
+            throw new Exception\InvalidArgumentException('Invalid collection name; Windows Azure collection names must consist of alphanumeric characters only, and be at least 3 characters long');
         }
         try {
             $this->_storageClient->createTable($name);
-        } catch(Zend_Service_WindowsAzure_Exception $e) {
+        } catch(WindowsAzureException\ExceptionInterface $e) {
             if (strpos($e->getMessage(), "table specified already exists") === false) {
-                throw new Zend_Cloud_DocumentService_Exception('Error on collection creation: '.$e->getMessage(), $e->getCode(), $e);
+                throw new Exception\RunTimeException('Error on collection creation: '.$e->getMessage(), $e->getCode(), $e);
             }
         }
         return true;
@@ -196,9 +199,9 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
     {
         try {
             $this->_storageClient->deleteTable($name);
-        } catch(Zend_Service_WindowsAzure_Exception $e) {
+        } catch(WindowsAzureException\ExceptionInterface $e) {
             if (strpos($e->getMessage(), "does not exist") === false) {
-                throw new Zend_Cloud_DocumentService_Exception('Error on collection deletion: '.$e->getMessage(), $e->getCode(), $e);
+                throw new Exception\RuntimeException('Error on collection deletion: '.$e->getMessage(), $e->getCode(), $e);
             }
         }
         return true;
@@ -219,8 +222,8 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
                 $restables[] = $table->name;
             }
             return $restables;
-        } catch(Zend_Service_WindowsAzure_Exception $e) {
-            throw new Zend_Cloud_DocumentService_Exception('Error on collection list: '.$e->getMessage(), $e->getCode(), $e);
+        } catch(WindowsAzureException\ExceptionInterface $e) {
+            throw new Exception\RuntimeException('Error on collection list: '.$e->getMessage(), $e->getCode(), $e);
         }
 
         return $tables;
@@ -231,12 +234,12 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      *
      * @param  array $document
      * @param  null|string $collectionName Collection to which this document belongs
-     * @return Zend_Cloud_DocumentService_Document
+     * @return \Zend\Cloud\DocumentService\Document
      */
     protected function _getDocumentFromArray($document, $collectionName = null)
     {
         $key = null;
-        if (!isset($document[Zend_Cloud_DocumentService_Document::KEY_FIELD])) {
+        if (!isset($document[Document::KEY_FIELD])) {
             if (isset($document[self::ROW_KEY])) {
                 $rowKey = $document[self::ROW_KEY];
                     unset($document[self::ROW_KEY]);
@@ -250,8 +253,8 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
                 }
             }
         } else {
-            $key = $document[Zend_Cloud_DocumentService_Document::KEY_FIELD];
-            unset($document[Zend_Cloud_DocumentService_Document::KEY_FIELD]);
+            $key = $document[Document::KEY_FIELD];
+            unset($document[Document::KEY_FIELD]);
         }
 
         $documentClass = $this->getDocumentClass();
@@ -263,7 +266,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      *
      * @param  string $collectionName
      * @param  null|array $options
-     * @return Zend_Cloud_DocumentService_DocumentSet
+     * @return \Zend\Cloud\DocumentService\DocumentSet
      */
     public function listDocuments($collectionName, array $options = null)
     {
@@ -274,8 +277,8 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
     /**
      * Insert document
      *
-     * @param  array|Zend_Cloud_DocumentService_Document $document
-     * @param  array                         $options
+     * @param  array|\Zend\Cloud\DocumentService\Document $document
+     * @param  array $options
      * @return boolean
      */
     public function insertDocument($collectionName, $document, $options = null)
@@ -284,8 +287,8 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
             $document =  $this->_getDocumentFromArray($document, $collectionName);
         }
 
-        if (!$document instanceof Zend_Cloud_DocumentService_Document) {
-            throw new Zend_Cloud_DocumentService_Exception('Invalid document supplied');
+        if (!$document instanceof \Zend\Cloud\DocumentService\Document) {
+            throw new Exception\InvalidArgumentException('Invalid document supplied');
         }
 
         $key = $this->_validateDocumentId($document->getId(), $collectionName);
@@ -295,11 +298,11 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
         $this->_validateFields($document);
         try {
 
-            $entity = new Zend_Service_WindowsAzure_Storage_DynamicTableEntity($key[0], $key[1]);
+            $entity = new DynamicTableEntity($key[0], $key[1]);
             $entity->setAzureValues($document->getFields(), true);
             $this->_storageClient->insertEntity($collectionName, $entity);
-        } catch(Zend_Service_WindowsAzure_Exception $e) {
-            throw new Zend_Cloud_DocumentService_Exception('Error on document insertion: '.$e->getMessage(), $e->getCode(), $e);
+        } catch(WindowsAzureException\ExceptionInterface $e) {
+            throw new Exception\RuntimeException('Error on document insertion: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -308,8 +311,8 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      *
      * The new document replaces the existing document.
      *
-     * @param  Zend_Cloud_DocumentService_Document $document
-     * @param  array                         $options
+     * @param  \Zend\Cloud\DocumentService\Document $document
+     * @param  array $options
      * @return boolean
      */
     public function replaceDocument($collectionName, $document, $options = null)
@@ -318,22 +321,22 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
             $document = $this->_getDocumentFromArray($document, $collectionName);
         }
 
-        if (!$document instanceof Zend_Cloud_DocumentService_Document) {
-            throw new Zend_Cloud_DocumentService_Exception('Invalid document supplied');
+        if (!$document instanceof \Zend\Cloud\DocumentService\Document) {
+            throw new Exception\InvalidArgumentException('Invalid document supplied');
         }
 
         $key = $this->_validateDocumentId($document->getId(), $collectionName);
         $this->_validateFields($document);
         try {
-            $entity = new Zend_Service_WindowsAzure_Storage_DynamicTableEntity($key[0], $key[1]);
+            $entity = new DynamicTableEntity($key[0], $key[1]);
             $entity->setAzureValues($document->getFields(), true);
             if (isset($options[self::VERIFY_ETAG])) {
                 $entity->setEtag($options[self::VERIFY_ETAG]);
             }
 
             $this->_storageClient->updateEntity($collectionName, $entity, isset($options[self::VERIFY_ETAG]));
-        } catch(Zend_Service_WindowsAzure_Exception $e) {
-            throw new Zend_Cloud_DocumentService_Exception('Error on document replace: '.$e->getMessage(), $e->getCode(), $e);
+        } catch(WindowsAzureException\ExceptionInterface $e) {
+            throw new Exception\RuntimeException('Error on document replace: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -343,17 +346,17 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      * The new document is merged the existing document.
      *
      * @param  string $collectionName
-     * @param  mixed|Zend_Cloud_DocumentService_Document $documentId Document identifier or document contaiing updates
-     * @param  null|array|Zend_Cloud_DocumentService_Document Fields to update (or new fields))
+     * @param  mixed|\Zend\Cloud\DocumentService\Document $documentId Document identifier or document containing updates
+     * @param  null|array|\Zend\Cloud\DocumentService\Document Fields to update (or new fields))
      * @param  array $options
      * @return boolean
      */
     public function updateDocument($collectionName, $documentId, $fieldset = null, $options = null)
     {
-        if (null === $fieldset && $documentId instanceof Zend_Cloud_DocumentService_Document) {
+        if (null === $fieldset && $documentId instanceof \Zend\Cloud\DocumentService\Document) {
             $fieldset   = $documentId->getFields();
             $documentId = $documentId->getId();
-        } elseif ($fieldset instanceof Zend_Cloud_DocumentService_Document) {
+        } elseif ($fieldset instanceof \Zend\Cloud\DocumentService\Document) {
             if ($documentId == null) {
                 $documentId = $fieldset->getId();
             }
@@ -363,7 +366,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
         $this->_validateCompositeKey($documentId, $collectionName);
         $this->_validateFields($fieldset);
         try {
-            $entity = new Zend_Service_WindowsAzure_Storage_DynamicTableEntity($documentId[0], $documentId[1]);
+            $entity = new DynamicTableEntity($documentId[0], $documentId[1]);
 
             // Ensure timestamp is set correctly
             if (isset($fieldset[self::TIMESTAMP_KEY])) {
@@ -377,8 +380,8 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
             }
 
             $this->_storageClient->mergeEntity($collectionName, $entity, isset($options[self::VERIFY_ETAG]));
-        } catch(Zend_Service_WindowsAzure_Exception $e) {
-            throw new Zend_Cloud_DocumentService_Exception('Error on document update: '.$e->getMessage(), $e->getCode(), $e);
+        } catch(WindowsAzureException\ExceptionInterface $e) {
+            throw new Exception\RuntimeException('Error on document update: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -391,21 +394,21 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      */
     public function deleteDocument($collectionName, $documentId, $options = null)
     {
-        if ($documentId instanceof Zend_Cloud_DocumentService_Document) {
+        if ($documentId instanceof \Zend\Cloud\DocumentService\Document) {
             $documentId = $documentId->getId();
         }
 
         $documentId = $this->_validateDocumentId($documentId, $collectionName);
 
         try {
-            $entity = new Zend_Service_WindowsAzure_Storage_DynamicTableEntity($documentId[0], $documentId[1]);
+            $entity = new DynamicTableEntity($documentId[0], $documentId[1]);
             if (isset($options[self::VERIFY_ETAG])) {
                 $entity->setEtag($options[self::VERIFY_ETAG]);
             }
             $this->_storageClient->deleteEntity($collectionName, $entity, isset($options[self::VERIFY_ETAG]));
-        } catch(Zend_Service_WindowsAzure_Exception $e) {
+        } catch(WindowsAzureException\ExceptionInterface $e) {
             if (strpos($e->getMessage(), "does not exist") === false) {
-                throw new Zend_Cloud_DocumentService_Exception('Error on document deletion: '.$e->getMessage(), $e->getCode(), $e);
+                throw new Exception\RuntimeException('Error on document deletion: '.$e->getMessage(), $e->getCode(), $e);
             }
         }
     }
@@ -416,7 +419,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      * @param  string $collectionName Collection name
      * @param  mixed $documentId Document ID, adapter-dependent
      * @param  array $options
-     * @return Zend_Cloud_DocumentService_Document
+     * @return \Zend\Cloud\DocumentService\Document
      */
     public function fetchDocument($collectionName, $documentId, $options = null)
     {
@@ -425,11 +428,11 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
             $entity = $this->_storageClient->retrieveEntityById($collectionName, $documentId[0], $documentId[1]);
             $documentClass = $this->getDocumentClass();
             return new $documentClass($this->_resolveAttributes($entity), array($entity->getPartitionKey(), $entity->getRowKey()));
-        } catch (Zend_Service_WindowsAzure_Exception $e) {
+        } catch (WindowsAzureException\ExceptionInterface $e) {
             if (strpos($e->getMessage(), "does not exist") !== false) {
                 return false;
             }
-            throw new Zend_Cloud_DocumentService_Exception('Error on document fetch: '.$e->getMessage(), $e->getCode(), $e);
+            throw new Exception\RuntimeException('Error on document fetch: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -438,14 +441,14 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      * $query, the query string will be passed directly to the service.
      *
      * @param  string $collectionName Collection name
-     * @param  string|Zend_Cloud_DocumentService_Adapter_WindowsAzure_Query $query
+     * @param  string|\Zend\Cloud\DocumentService\Adapter\WindowsAzure\Query $query
      * @param  array $options
-     * @return array Zend_Cloud_DocumentService_DocumentSet
+     * @return array|\Zend\Cloud\DocumentService\DocumentSet
      */
     public function query($collectionName, $query, $options = null)
     {
         try {
-            if ($query instanceof Zend_Cloud_DocumentService_Adapter_WindowsAzure_Query) {
+            if ($query instanceof \Zend\Cloud\DocumentService\Adapter\WindowsAzure\Query) {
                 $entities = $this->_storageClient->retrieveEntities($query->assemble());
             } else {
                 $entities = $this->_storageClient->retrieveEntities($collectionName, $query);
@@ -459,8 +462,8 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
                     array($entity->getPartitionKey(), $entity->getRowKey())
                 );
             }
-        } catch(Zend_Service_WindowsAzure_Exception $e) {
-            throw new Zend_Cloud_DocumentService_Exception('Error on document query: '.$e->getMessage(), $e->getCode(), $e);
+        } catch(WindowsAzureException\ExceptionInterface $e) {
+            throw new Exception\RuntimeException('Error on document query: '.$e->getMessage(), $e->getCode(), $e);
         }
 
         $setClass = $this->getDocumentSetClass();
@@ -470,20 +473,16 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
     /**
      * Create query statement
      *
-     * @return Zend_Cloud_DocumentService_Query
+     * @return \Zend\Cloud\DocumentService\Query
      */
     public function select($fields = null)
     {
         $queryClass = $this->getQueryClass();
-        if (!class_exists($queryClass)) {
-            require_once 'Zend/Loader.php';
-            Zend_Loader::loadClass($queryClass);
-        }
-
+        
         $query = new $queryClass();
         $defaultClass = self::DEFAULT_QUERY_CLASS;
         if (!$query instanceof $defaultClass) {
-            throw new Zend_Cloud_DocumentService_Exception('Query class must extend ' . self::DEFAULT_QUERY_CLASS);
+            throw new Exception\RuntimeException('Query class must extend ' . self::DEFAULT_QUERY_CLASS);
         }
 
         $query->select($fields);
@@ -493,7 +492,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
     /**
      * Get the concrete service client
      *
-     * @return Zend_Service_WindowsAzure_Storage_Table
+     * @return \Zend\Service\WindowsAzure\Storage\Table
      */
     public function getClient()
     {
@@ -503,10 +502,10 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
     /**
      * Resolve table values to attributes
      *
-     * @param  Zend_Service_WindowsAzure_Storage_TableEntity $entity
+     * @param  \Zend\Service\WindowsAzure\Storage\TableEntity $entity
      * @return array
      */
-    protected function _resolveAttributes(Zend_Service_WindowsAzure_Storage_TableEntity $entity)
+    protected function _resolveAttributes(\Zend\Service\WindowsAzure\Storage\TableEntity $entity)
     {
         $result = array();
         foreach ($entity->getAzureValues() as $attr) {
@@ -521,12 +520,12 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      *
      * @param  string $key
      * @return void
-     * @throws Zend_Cloud_DocumentService_Exception
+     * @throws \Zend\Cloud\DocumentService\Exception\InvalidArgumentException
      */
     protected function _validateKey($key)
     {
         if (preg_match('@[/#?' . preg_quote('\\') . ']@', $key)) {
-            throw new Zend_Cloud_DocumentService_Exception('Invalid partition or row key provided; must not contain /, \\,  #, or ? characters');
+            throw new Exception\InvalidArgumentException('Invalid partition or row key provided; must not contain /, \\,  #, or ? characters');
         }
     }
 
@@ -534,12 +533,12 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      * Validate a composite key
      *
      * @param  array $key
-     * @return throws Zend_Cloud_DocumentService_Exception
+     * @throws \Zend\Cloud\DocumentService\Exception\InvalidArgumentException
      */
     protected function _validateCompositeKey(array $key)
     {
         if (2 != count($key)) {
-            throw new Zend_Cloud_DocumentService_Exception('Invalid document key provided; must contain exactly two elements: a PartitionKey and a RowKey');
+            throw new Exception\InvalidArgumentException('Invalid document key provided; must contain exactly two elements: a PartitionKey and a RowKey');
         }
         foreach ($key as $k) {
             $this->_validateKey($k);
@@ -557,9 +556,10 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      * - otherwise, it's invalid
      *
      * @param  array|string $documentId
-     * @param  null|string $collectionName
+     * @param  null|string  $collectionName
+     * @throws Exception\InvalidArgumentException
+     * @throws Exception\RuntimeException
      * @return array
-     * @throws Zend_Cloud_DocumentService_Exception
      */
     protected function _validateDocumentId($documentId, $collectionName = false)
     {
@@ -568,7 +568,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
             return $documentId;
         }
         if (!is_string($documentId)) {
-            throw new Zend_Cloud_DocumentService_Exception('Invalid document identifier; must be a string or an array');
+            throw new Exception\InvalidArgumentException('Invalid document identifier; must be a string or an array');
         }
 
         $this->_validateKey($documentId);
@@ -579,7 +579,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
         if (null !== $collectionName) {
             return array($collectionName, $documentId);
         }
-        throw new Zend_Cloud_DocumentService_Exception('Cannot determine partition name; invalid document identifier');
+        throw new Exception\RuntimeException('Cannot determine partition name; invalid document identifier');
     }
 
     /**
@@ -588,16 +588,16 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      * Since Azure uses Atom, and fieldnames are included as part of XML
      * element tag names, the field names must be valid XML names.
      *
-     * @param  Zend_Cloud_DocumentService_Document|array $document
+     * @param  \Zend\Cloud\DocumentService\Document|array $document
+     * @throws Exception\RuntimeException
      * @return void
-     * @throws Zend_Cloud_DocumentService_Exception
      */
     public function _validateFields($document)
     {
-        if ($document instanceof Zend_Cloud_DocumentService_Document) {
+        if ($document instanceof \Zend\Cloud\DocumentService\Document) {
             $document = $document->getFields();
         } elseif (!is_array($document)) {
-            throw new Zend_Cloud_DocumentService_Exception('Cannot inspect fields; invalid type provided');
+            throw new Exception\RuntimeException('Cannot inspect fields; invalid type provided');
         }
 
         foreach (array_keys($document) as $key) {
@@ -617,12 +617,12 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure
      *
      * @param  string $key
      * @return void
-     * @throws Zend_Cloud_DocumentService_Exception
+     * @throws \Zend\Cloud\DocumentService\Exception\InvalidArgumentException
      */
     public function _validateFieldKey($key)
     {
         if (!preg_match('/^[_A-Za-z][-._A-Za-z0-9]*$/', $key)) {
-            throw new Zend_Cloud_DocumentService_Exception('Field keys must conform to XML names (^[_A-Za-z][-._A-Za-z0-9]*$); key "' . $key . '" does not match');
+            throw new Exception\InvalidArgumentException('Field keys must conform to XML names (^[_A-Za-z][-._A-Za-z0-9]*$); key "' . $key . '" does not match');
         }
     }
 }

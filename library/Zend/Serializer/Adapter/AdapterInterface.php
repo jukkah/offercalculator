@@ -17,8 +17,9 @@
  * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: AdapterInterface.php 24594 2012-01-05 21:27:01Z matthew $
  */
+
+namespace Zend\Serializer\Adapter;
 
 /**
  * @category   Zend
@@ -27,30 +28,29 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_Serializer_Adapter_AdapterInterface
+interface AdapterInterface
 {
     /**
      * Constructor
      *
-     * @param  array|Zend_Config $opts Serializer options
-     * @return void
+     * @param  array|\Traversable $options Serializer options
      */
-    public function __construct($opts = array());
+    public function __construct($options = array());
 
     /**
      * Set serializer options
      *
-     * @param  array|Zend_Config $opts Serializer options
-     * @return Zend_Serializer_Adapter_AdapterInterface
+     * @param  array|\Traversable $options Serializer options
+     * @return AdapterInterface
      */
-    public function setOptions($opts);
+    public function setOptions($options);
 
     /**
      * Set a serializer option
      *
      * @param  string $name Option name
      * @param  mixed $value Option value
-     * @return Zend_Serializer_Adapter_AdapterInterface
+     * @return AdapterInterface
      */
     public function setOption($name, $value);
 
@@ -66,7 +66,7 @@ interface Zend_Serializer_Adapter_AdapterInterface
      *
      * @param  string $name
      * @return mixed
-     * @throws Zend_Serializer_Exception
+     * @throws AdapterInterface
      */
     public function getOption($name);
 
@@ -76,7 +76,7 @@ interface Zend_Serializer_Adapter_AdapterInterface
      * @param  mixed $value Data to serialize
      * @param  array $options Serialize options
      * @return string
-     * @throws Zend_Serializer_Exception
+     * @throws \Zend\Serializer\Exception\ExceptionInterface
      */
     public function serialize($value, array $options = array());
 
@@ -86,7 +86,7 @@ interface Zend_Serializer_Adapter_AdapterInterface
      * @param  string $serialized Serialized string
      * @param  array $options Unserialize options
      * @return mixed
-     * @throws Zend_Serializer_Exception
+     * @throws \Zend\Serializer\Exception\ExceptionInterface
      */
     public function unserialize($serialized, array $options = array());
 }

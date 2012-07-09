@@ -17,13 +17,11 @@
  * @subpackage Ec2
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Instance.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Service_Amazon_Ec2_Abstract
- */
-require_once 'Zend/Service/Amazon/Ec2/Abstract.php';
+namespace Zend\Service\Amazon\Ec2;
+use Zend\Service\Amazon;
+use Zend\Service\Amazon\Ec2\Exception;
 
 /**
  * An Amazon EC2 interface that allows yout to run, terminate, reboot and describe Amazon
@@ -35,30 +33,34 @@ require_once 'Zend/Service/Amazon/Ec2/Abstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_Ec2_Instance extends Zend_Service_Amazon_Ec2_Abstract
+class Instance extends AbstractEc2
 {
     /**
-     * Constant for Small Instance TYpe
+     * Constant for Micro INstance Type
+     */
+    const MICRO = 't1.micro';
+    /**
+     * Constant for Small Instance Type
      */
     const SMALL = 'm1.small';
 
     /**
-     * Constant for Large Instance TYpe
+     * Constant for Large Instance Type
      */
     const LARGE = 'm1.large';
 
     /**
-     * Constant for X-Large Instance TYpe
+     * Constant for X-Large Instance Type
      */
     const XLARGE = 'm1.xlarge';
 
     /**
-     * Constant for High CPU Medium Instance TYpe
+     * Constant for High CPU Medium Instance Type
      */
     const HCPU_MEDIUM = 'c1.medium';
 
     /**
-     * Constant for High CPU X-Large Instance TYpe
+     * Constant for High CPU X-Large Instance Type
      */
     const HCPU_XLARGE = 'c1.xlarge';
 
@@ -108,17 +110,16 @@ class Zend_Service_Amazon_Ec2_Instance extends Zend_Service_Amazon_Ec2_Abstract
     public function run(array $options)
     {
         $_defaultOptions = array(
-            'minCount'  => 1,
-            'maxCount'  => 1,
-            'instanceType' => Zend_Service_Amazon_Ec2_Instance::SMALL
+            'minCount'     => 1,
+            'maxCount'     => 1,
+            'instanceType' => self::SMALL
         );
 
         // set / override the defualt optoins if they are not passed into the array;
         $options = array_merge($_defaultOptions, $options);
 
         if(!isset($options['imageId'])) {
-            require_once 'Zend/Service/Amazon/Ec2/Exception.php';
-            throw new Zend_Service_Amazon_Ec2_Exception('No Image Id Provided');
+            throw new Exception\InvalidArgumentException('No Image Id Provided');
         }
 
 
@@ -338,7 +339,7 @@ class Zend_Service_Amazon_Ec2_Instance extends Zend_Service_Amazon_Ec2_Abstract
         } elseif($instanceId) {
             $params['InstanceId.1'] = $instanceId;
         }
-
+        
         $response = $this->sendRequest($params);
         $xpath = $response->getXPath();
 
@@ -360,7 +361,6 @@ class Zend_Service_Amazon_Ec2_Instance extends Zend_Service_Amazon_Ec2_Abstract
 
         return $return;
     }
-
     /**
      * Requests a reboot of one or more instances.
      *

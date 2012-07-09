@@ -17,13 +17,11 @@
  * @subpackage Ec2
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Ebs.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Service_Amazon_Ec2_Abstract
- */
-require_once 'Zend/Service/Amazon/Ec2/Abstract.php';
+namespace Zend\Service\Amazon\Ec2;
+use Zend\Service\Amazon;
+use Zend\Service\Amazon\Ec2\Exception;
 
 /**
  * An Amazon EC2 interface to create, describe, attach, detach and delete Elastic Block
@@ -35,7 +33,7 @@ require_once 'Zend/Service/Amazon/Ec2/Abstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_Ec2_Ebs extends Zend_Service_Amazon_Ec2_Abstract
+class Ebs extends AbstractEc2
 {
     /**
      * Creates a new Amazon EBS volume that you can mount from any Amazon EC2 instance.

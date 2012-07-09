@@ -16,10 +16,12 @@
  * @package    Zend_Feed_Writer
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Source.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-require_once 'Zend/Feed/Writer/Renderer/Feed/Atom/AtomAbstract.php';
+namespace Zend\Feed\Writer\Renderer\Feed\Atom;
+
+use DOMDocument;
+use DOMElement;
 
 /**
  * @category   Zend
@@ -27,26 +29,24 @@ require_once 'Zend/Feed/Writer/Renderer/Feed/Atom/AtomAbstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Feed_Writer_Renderer_Feed_Atom_Source
-    extends Zend_Feed_Writer_Renderer_Feed_Atom_AtomAbstract
-    implements Zend_Feed_Writer_Renderer_RendererInterface
+class Source extends AbstractAtom implements \Zend\Feed\Writer\Renderer\RendererInterface
 {
 
     /**
      * Constructor
-     *
-     * @param  Zend_Feed_Writer_Feed_Source $container
+     * 
+     * @param  \Zend\Feed\Writer\Source $container
      * @return void
      */
-    public function __construct (Zend_Feed_Writer_Source $container)
+    public function __construct (\Zend\Feed\Writer\Source $container)
     {
         parent::__construct($container);
     }
-
+    
     /**
      * Render Atom Feed Metadata (Source element)
-     *
-     * @return Zend_Feed_Writer_Renderer_Feed_Atom
+     * 
+     * @return \Zend\Feed\Writer\Renderer\Feed\Atom
      */
     public function render()
     {
@@ -71,7 +71,7 @@ class Zend_Feed_Writer_Renderer_Feed_Atom_Source
         $this->_setAuthors($this->_dom, $root);
         $this->_setCopyright($this->_dom, $root);
         $this->_setCategories($this->_dom, $root);
-
+        
         foreach ($this->_extensions as $ext) {
             $ext->setType($this->getType());
             $ext->setRootElement($this->getRootElement());
@@ -80,12 +80,12 @@ class Zend_Feed_Writer_Renderer_Feed_Atom_Source
         }
         return $this;
     }
-
+    
     /**
      * Set feed generator string
-     *
-     * @param  DOMDocument $dom
-     * @param  DOMElement $root
+     * 
+     * @param  DOMDocument $dom 
+     * @param  DOMElement $root 
      * @return void
      */
     protected function _setGenerator(DOMDocument $dom, DOMElement $root)

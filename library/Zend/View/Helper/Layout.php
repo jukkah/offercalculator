@@ -16,12 +16,13 @@
  * @package    Zend_View
  * @subpackage Helper
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Layout.php 24594 2012-01-05 21:27:01Z matthew $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_View_Helper_Abstract.php */
-require_once 'Zend/View/Helper/Abstract.php';
+namespace Zend\View\Helper;
+
+use Zend\View\Exception;
+use Zend\View\Model\ModelInterface as Model;
 
 /**
  * View helper for retrieving layout object
@@ -31,51 +32,83 @@ require_once 'Zend/View/Helper/Abstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_Layout extends Zend_View_Helper_Abstract
+class Layout extends AbstractHelper
 {
-    /** @var Zend_Layout */
-    protected $_layout;
+    /**
+     * @var ViewModel
+     */
+    protected $viewModelHelper;
 
     /**
-     * Get layout object
+     * Get layout template
      *
-     * @return Zend_Layout
+     * @return string
      */
     public function getLayout()
     {
-        if (null === $this->_layout) {
-            require_once 'Zend/Layout.php';
-            $this->_layout = Zend_Layout::getMvcInstance();
-            if (null === $this->_layout) {
-                // Implicitly creates layout object
-                $this->_layout = new Zend_Layout();
-            }
-        }
-
-        return $this->_layout;
+        $model = $this->getRoot();
+        return $model->getTemplate();
     }
 
     /**
-     * Set layout object
+     * Set layout template
      *
-     * @param  Zend_Layout $layout
-     * @return Zend_Layout_Controller_Action_Helper_Layout
+     * @param  string $template
+     * @return Layout
      */
-    public function setLayout(Zend_Layout $layout)
+    public function setTemplate($template)
     {
-        $this->_layout = $layout;
+        $model = $this->getRoot();
+        $model->setTemplate((string) $template);
         return $this;
     }
 
     /**
-     * Return layout object
+     * Set layout template or retrieve "layout" view model
      *
-     * Usage: $this->layout()->setLayout('alternate');
+     * If no arguments are given, grabs the "root" or "layout" view model.
+     * Otherwise, attempts to set the template for that view model.
      *
-     * @return Zend_Layout
+     * @param  null|string $template
+     * @return Layout
      */
-    public function layout()
+    public function __invoke($template = null)
     {
-        return $this->getLayout();
+        if (null === $template) {
+            return $this->getRoot();
+        }
+        return $this->setTemplate($template);
+    }
+
+    /**
+     * Get the root view model
+     * 
+     * @return null|Model
+     */
+    protected function getRoot()
+    {
+        $helper = $this->getViewModelHelper();
+        if (!$helper->hasRoot()) {
+            throw new Exception\RuntimeException(sprintf(
+                '%s: no view model currently registered as root in renderer',
+                __METHOD__
+            ));
+        }
+        return $helper->getRoot();
+    }
+
+    /**
+     * Retrieve the view model helper
+     * 
+     * @return ViewModel
+     */
+    protected function getViewModelHelper()
+    {
+        if ($this->viewModelHelper) {
+            return $this->viewModelHelper;
+        }
+        $view = $this->getView();
+        $this->viewModelHelper = $view->plugin('view_model');
+        return $this->viewModelHelper;
     }
 }

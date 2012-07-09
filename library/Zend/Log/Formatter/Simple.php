@@ -17,11 +17,11 @@
  * @subpackage Formatter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Simple.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/** Zend_Log_Formatter_Abstract */
-require_once 'Zend/Log/Formatter/Abstract.php';
+namespace Zend\Log\Formatter;
+
+use Zend\Log\Exception;
 
 /**
  * @category   Zend
@@ -29,23 +29,22 @@ require_once 'Zend/Log/Formatter/Abstract.php';
  * @subpackage Formatter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Simple.php 24594 2012-01-05 21:27:01Z matthew $
  */
-class Zend_Log_Formatter_Simple extends Zend_Log_Formatter_Abstract
+class Simple implements FormatterInterface
 {
     /**
      * @var string
      */
-    protected $_format;
+    protected $format;
 
-    const DEFAULT_FORMAT = '%timestamp% %priorityName% (%priority%): %message%';
+    const DEFAULT_FORMAT = '%timestamp% %priorityName% (%priority%): %message% %info%';
 
     /**
      * Class constructor
      *
-     * @param  null|string  $format  Format specifier for log messages
-     * @return void
-     * @throws Zend_Log_Exception
+     * @param null|string $format Format specifier for log messages
+     * @return Simple
+     * @throws Exception\InvalidArgumentException
      */
     public function __construct($format = null)
     {
@@ -54,45 +53,25 @@ class Zend_Log_Formatter_Simple extends Zend_Log_Formatter_Abstract
         }
 
         if (!is_string($format)) {
-            require_once 'Zend/Log/Exception.php';
-            throw new Zend_Log_Exception('Format must be a string');
+            throw new Exception\InvalidArgumentException('Format must be a string');
         }
 
-        $this->_format = $format;
-    }
-
-    /**
-	 * Factory for Zend_Log_Formatter_Simple classe
-	 *
-	 * @param array|Zend_Config $options
-	 * @return Zend_Log_Formatter_Simple
-     */
-    public static function factory($options)
-    {
-        $format = null;
-        if (null !== $options) {
-            if ($options instanceof Zend_Config) {
-                $options = $options->toArray();
-            }
-
-            if (array_key_exists('format', $options)) {
-                $format = $options['format'];
-            }
-        }
-
-        return new self($format);
+        $this->format = $format;
     }
 
     /**
      * Formats data into a single line to be written by the writer.
      *
-     * @param  array    $event    event data
-     * @return string             formatted line to write to the log
+     * @param array $event event data
+     * @return string formatted line to write to the log
      */
     public function format($event)
     {
-        $output = $this->_format;
+        $output = $this->format;
 
+        if (!isset($event['info'])) {
+            $event['info'] = '';
+        }
         foreach ($event as $name => $value) {
             if ((is_object($value) && !method_exists($value,'__toString'))
                 || is_array($value)

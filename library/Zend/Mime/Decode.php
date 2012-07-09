@@ -16,13 +16,11 @@
  * @package    Zend_Mime
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Decode.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Mime
- */
-require_once 'Zend/Mime.php';
+namespace Zend\Mime;
+
+use Zend\Mail\Headers;
 
 /**
  * @category   Zend
@@ -30,7 +28,7 @@ require_once 'Zend/Mime.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Mime_Decode
+class Decode
 {
     /**
      * Explode MIME multipart string into seperate parts
@@ -40,7 +38,7 @@ class Zend_Mime_Decode
      * @param  string $body     raw body of message
      * @param  string $boundary boundary as found in content-type
      * @return array parts with content of each part, empty if no parts found
-     * @throws Zend_Exception
+     * @throws Exception\RuntimeException
      */
     public static function splitMime($body, $boundary)
     {
@@ -69,7 +67,7 @@ class Zend_Mime_Decode
         // no more parts, find end boundary
         $p = strpos($body, '--' . $boundary . '--', $start);
         if ($p===false) {
-            throw new Zend_Exception('Not a valid Mime Message: End Missing');
+            throw new Exception\RuntimeException('Not a valid Mime Message: End Missing');
         }
 
         // the remaining part also needs to be parsed:
@@ -85,15 +83,17 @@ class Zend_Mime_Decode
      * @param  string $boundary boundary as found in content-type
      * @param  string $EOL EOL string; defaults to {@link Zend_Mime::LINEEND}
      * @return array|null parts as array('header' => array(name => value), 'body' => content), null if no parts found
-     * @throws Zend_Exception
+     * @throws Exception\RuntimeException
      */
-    public static function splitMessageStruct($message, $boundary, $EOL = Zend_Mime::LINEEND)
+    public static function splitMessageStruct($message, $boundary, $EOL = Mime::LINEEND)
     {
         $parts = self::splitMime($message, $boundary);
         if (count($parts) <= 0) {
             return null;
         }
         $result = array();
+        $headers = null; // "Declare" variable before the first usage "for reading"
+        $body    = null; // "Declare" variable before the first usage "for reading"
         foreach ($parts as $part) {
             self::splitMessage($part, $headers, $body, $EOL);
             $result[] = array('header' => $headers,
@@ -108,14 +108,17 @@ class Zend_Mime_Decode
      *
      * The charset of the returned headers depend on your iconv settings.
      *
-     * @param  string $message raw message with header and optional content
-     * @param  array  $headers output param, array with headers as array(name => value)
-     * @param  string $body    output param, content of message
-     * @param  string $EOL EOL string; defaults to {@link Zend_Mime::LINEEND}
+     * @param  string|Headers  $message raw message with header and optional content
+     * @param  Headers         $headers output param, headers container
+     * @param  string          $body    output param, content of message
+     * @param  string          $EOL EOL string; defaults to {@link Zend_Mime::LINEEND}
      * @return null
      */
-    public static function splitMessage($message, &$headers, &$body, $EOL = Zend_Mime::LINEEND)
+    public static function splitMessage($message, &$headers, &$body, $EOL = Mime::LINEEND)
     {
+        if ($message instanceof Headers) {
+            $message = $message->toString();
+        }
         // check for valid header at first line
         $firstline = strtok($message, "\n");
         if (!preg_match('%^[^\s]+[^:]*:%', $firstline)) {
@@ -140,30 +143,7 @@ class Zend_Mime_Decode
             @list($headers, $body) = @preg_split("%([\r\n]+)\\1%U", $message, 2);
         }
 
-        $headers = iconv_mime_decode_headers($headers, ICONV_MIME_DECODE_CONTINUE_ON_ERROR);
-
-        if ($headers === false ) {
-            // an error occurs during the decoding
-            return;
-        }
-
-        // normalize header names
-        foreach ($headers as $name => $header) {
-            $lower = strtolower($name);
-            if ($lower == $name) {
-                continue;
-            }
-            unset($headers[$name]);
-            if (!isset($headers[$lower])) {
-                $headers[$lower] = $header;
-                continue;
-            }
-            if (is_array($headers[$lower])) {
-                $headers[$lower][] = $header;
-                continue;
-            }
-            $headers[$lower] = array($headers[$lower], $header);
-        }
+        $headers = Headers::fromString($headers, $EOL);
     }
 
     /**
@@ -181,13 +161,13 @@ class Zend_Mime_Decode
     /**
      * split a header field like content type in its different parts
      *
-     * @param  string $type       header field
+     * @param  string $field      header field
      * @param  string $wantedPart the wanted part, else an array with all parts is returned
      * @param  string $firstName  key name for the first part
      * @return string|array wanted part or all parts as array($firstName => firstPart, partname => value)
-     * @throws Zend_Exception
+     * @throws Exception\RuntimeException
      */
-    public static function splitHeaderField($field, $wantedPart = null, $firstName = 0)
+    public static function splitHeaderField($field, $wantedPart = null, $firstName = '0')
     {
         $wantedPart = strtolower($wantedPart);
         $firstName = strtolower($firstName);
@@ -200,7 +180,7 @@ class Zend_Mime_Decode
 
         $field = $firstName . '=' . $field;
         if (!preg_match_all('%([^=\s]+)\s*=\s*("[^"]+"|[^;]+)(;\s*|$)%', $field, $matches)) {
-            throw new Zend_Exception('not a valid header field');
+            throw new Exception\RuntimeException('not a valid header field');
         }
 
         if ($wantedPart) {
@@ -234,11 +214,11 @@ class Zend_Mime_Decode
      *
      * The charset of the returned string depends on your iconv settings.
      *
-     * @param  string encoded string
+     * @param  string $string encoded string
      * @return string decoded string
      */
     public static function decodeQuotedPrintable($string)
     {
-        return quoted_printable_decode($string);
+        return iconv_mime_decode($string, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 'UTF-8');
     }
 }

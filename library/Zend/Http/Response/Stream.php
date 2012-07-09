@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -16,10 +15,15 @@
  * @category   Zend
  * @package    Zend_Http
  * @subpackage Response
- * @version    $Id: Stream.php 24594 2012-01-05 21:27:01Z matthew $
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
+
+namespace Zend\Http\Response;
+
+use Zend\Http\Response,
+    Zend\Http\Exception;
+
 
 /**
  * Zend_Http_Response represents an HTTP 1.0 / 1.1 response message. It
@@ -31,8 +35,23 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Http_Response_Stream extends Zend_Http_Response
+class Stream extends Response
 {
+
+    /**
+     * The Content-Length value, if set
+     *
+     * @var int
+     */
+    protected $contentLength = null;
+
+    /**
+     * The portion of the body that has alredy been streamed
+     *
+     * @var int
+     */
+    protected $contentStreamed = 0;
+
     /**
      * Response as stream
      *
@@ -47,14 +66,14 @@ class Zend_Http_Response_Stream extends Zend_Http_Response
      *
      * @var string
      */
-    protected $stream_name;
+    protected $streamName;
 
     /**
      * Should we clean up the stream file when this response is closed?
      *
      * @var boolean
      */
-    protected $_cleanup;
+    protected $cleanup;
 
     /**
      * Get the response as stream
@@ -70,7 +89,7 @@ class Zend_Http_Response_Stream extends Zend_Http_Response
      * Set the response stream
      *
      * @param resourse $stream
-     * @return Zend_Http_Response_Stream
+     * @return Stream
      */
     public function setStream($stream)
     {
@@ -83,17 +102,19 @@ class Zend_Http_Response_Stream extends Zend_Http_Response
      *
      * @return boolean
      */
-    public function getCleanup() {
-        return $this->_cleanup;
+    public function getCleanup()
+    {
+        return $this->cleanup;
     }
 
     /**
      * Set the cleanup trigger
      *
-     * @param bool $cleanup Set cleanup trigger
+     * @param $cleanup Set cleanup trigger
      */
-    public function setCleanup($cleanup = true) {
-        $this->_cleanup = $cleanup;
+    public function setCleanup($cleanup = true)
+    {
+        $this->cleanup = $cleanup;
     }
 
     /**
@@ -101,67 +122,95 @@ class Zend_Http_Response_Stream extends Zend_Http_Response
      *
      * @return string
      */
-    public function getStreamName() {
-        return $this->stream_name;
+    public function getStreamName()
+    {
+        return $this->streamName;
     }
 
     /**
      * Set file name associated with the stream
      *
-     * @param string $stream_name Name to set
-     * @return Zend_Http_Response_Stream
+     * @param string $streamName Name to set
+     * @return Stream
      */
-    public function setStreamName($stream_name) {
-        $this->stream_name = $stream_name;
+    public function setStreamName($streamName)
+    {
+        $this->streamName = $streamName;
         return $this;
     }
 
 
     /**
-     * HTTP response constructor
+     * Create a new Zend\Http\Response\Stream object from a stream
      *
-     * In most cases, you would use Zend_Http_Response::fromString to parse an HTTP
-     * response string and create a new Zend_Http_Response object.
-     *
-     * NOTE: The constructor no longer accepts nulls or empty values for the code and
-     * headers and will throw an exception if the passed values do not form a valid HTTP
-     * responses.
-     *
-     * If no message is passed, the message will be guessed according to the response code.
-     *
-     * @param int $code Response code (200, 404, ...)
-     * @param array $headers Headers array
-     * @param string $body Response body
-     * @param string $version HTTP version
-     * @param string $message Response code as text
-     * @throws Zend_Http_Exception
+     * @param  string $responseString
+     * @param  resource $stream
+     * @return Stream
      */
-    public function __construct($code, $headers, $body = null, $version = '1.1', $message = null)
+    public static function fromStream($responseString, $stream)
     {
 
-        if(is_resource($body)) {
-            $this->setStream($body);
-            $body = '';
+        if (!is_resource($stream)) {
+            throw new Exception\InvalidArgumentException('A valid stream is required');
         }
-        parent::__construct($code, $headers, $body, $version, $message);
+
+        $headerComplete = false;
+        $headersString  = '';
+
+        $responseArray = explode("\n",$responseString);
+
+        while (count($responseArray)) {
+            $nextLine = array_shift($responseArray);
+            $headersString .= $nextLine."\n";
+            $nextLineTrimmed = trim($nextLine);
+            if ($nextLineTrimmed == "") {
+                $headerComplete = true;
+                break;
+            }
+
+        }
+
+        if (!$headerComplete) {
+            while (false !== ($nextLine = fgets($stream))) {
+
+                $headersString .= trim($nextLine)."\r\n";
+                if ($nextLine == "\r\n" || $nextLine == "\n") {
+                    $headerComplete = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$headerComplete) {
+            throw new Exception\OutOfRangeException('End of header not found');
+        }
+
+        $response = static::fromString($headersString);
+
+        if (is_resource($stream)) {
+            $response->setStream($stream);
+        }
+
+        if (count($responseArray)) {
+            $response->content = implode("\n", $responseArray);
+        }
+
+        $headers = $response->getHeaders();
+        foreach($headers as $header) {
+            if ($header instanceof \Zend\Http\Header\ContentLength) {
+                $response->contentLength = (int) $header->getFieldValue();
+                if (strlen($response->content) > $response->contentLength) {
+                    throw new Exception\OutOfRangeException(
+                        sprintf('Too much content was extracted from the stream (%d instead of %d bytes)',
+                                    strlen($this->content), $this->contentLength));
+                }
+                break;
+            }
+        }
+
+        return $response;
     }
 
-    /**
-     * Create a new Zend_Http_Response_Stream object from a string
-     *
-     * @param string $response_str
-     * @param resource $stream
-     * @return Zend_Http_Response_Stream
-     */
-    public static function fromStream($response_str, $stream)
-    {
-        $code    = self::extractCode($response_str);
-        $headers = self::extractHeaders($response_str);
-        $version = self::extractVersion($response_str);
-        $message = self::extractMessage($response_str);
-
-        return new self($code, $headers, $stream, $version, $message);
-    }
 
     /**
      * Get the response body as string
@@ -177,7 +226,7 @@ class Zend_Http_Response_Stream extends Zend_Http_Response
      */
     public function getBody()
     {
-        if($this->stream != null) {
+        if ($this->stream != null) {
             $this->readStream();
         }
         return parent::getBody();
@@ -193,11 +242,12 @@ class Zend_Http_Response_Stream extends Zend_Http_Response
      */
     public function getRawBody()
     {
-        if($this->stream) {
+        if ($this->stream) {
             $this->readStream();
         }
-        return $this->body;
+        return $this->content;
     }
+
 
     /**
      * Read stream content and return it as string
@@ -208,28 +258,34 @@ class Zend_Http_Response_Stream extends Zend_Http_Response
      */
     protected function readStream()
     {
-        if(!is_resource($this->stream)) {
+        if (!is_null($this->contentLength)) {
+            $bytes =  $this->contentLength - $this->contentStreamed;
+        } else {
+            $bytes = -1; //Read the whole buffer
+        }
+
+        if (!is_resource($this->stream) || $bytes == 0) {
             return '';
         }
 
-        if(isset($headers['content-length'])) {
-            $this->body = stream_get_contents($this->stream, $headers['content-length']);
-        } else {
-            $this->body = stream_get_contents($this->stream);
-        }
-        fclose($this->stream);
-        $this->stream = null;
-    }
+        $this->content         .= stream_get_contents($this->stream, $bytes);
+        $this->contentStreamed += strlen($this->content);
 
-    public function __destruct()
-    {
-        if(is_resource($this->stream)) {
-            fclose($this->stream);
+        if ($this->contentLength == $this->contentStreamed) {
             $this->stream = null;
         }
-        if($this->_cleanup) {
+    }
+
+    /**
+     * Destructor
+     */
+    public function __destruct()
+    {
+        if (is_resource($this->stream)) {
+            $this->stream = null; //Could be listened by others
+        }
+        if ($this->cleanup) {
             @unlink($this->stream_name);
         }
     }
-
 }

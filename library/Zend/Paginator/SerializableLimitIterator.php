@@ -1,23 +1,16 @@
 <?php
 /**
- * Zend Framework
+ * Zend Framework (http://framework.zend.com/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://framework.zend.com/license/new-bsd
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
- *
- * @category   Zend
- * @package    Zend_Paginator
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: SerializableLimitIterator.php 24594 2012-01-05 21:27:01Z matthew $
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
+ * @package   Zend_Paginator
  */
+
+namespace Zend\Paginator;
+
+use Iterator;
 
 /**
  * @category   Zend
@@ -25,7 +18,7 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Paginator_SerializableLimitIterator extends LimitIterator implements Serializable, ArrayAccess
+class SerializableLimitIterator extends \LimitIterator implements \Serializable, \ArrayAccess
 {
 
     /**
@@ -43,7 +36,7 @@ class Zend_Paginator_SerializableLimitIterator extends LimitIterator implements 
     private $_count;
 
     /**
-     * Construct a Zend_Paginator_SerializableLimitIterator
+     * Construct a Zend\Paginator\SerializableLimitIterator
      *
      * @param Iterator $it Iterator to limit (must be serializable by un-/serialize)
      * @param int $offset Offset to first element
@@ -110,6 +103,7 @@ class Zend_Paginator_SerializableLimitIterator extends LimitIterator implements 
      * Determine if a value of Iterator is set and is not NULL
      *
      * @param int $offset
+     * @return bool
      */
     public function offsetExists($offset)
     {
@@ -120,9 +114,8 @@ class Zend_Paginator_SerializableLimitIterator extends LimitIterator implements 
                 $current = $this->current();
                 $this->seek($currentOffset);
                 return null !== $current;
-            } catch (OutOfBoundsException $e) {
+            } catch (\OutOfBoundsException $e) {
                 // reset position in case of exception is assigned null
-                $this->rewind();
                 $this->seek($currentOffset);
                 return false;
             }

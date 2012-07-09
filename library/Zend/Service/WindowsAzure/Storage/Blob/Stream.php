@@ -1,44 +1,25 @@
 <?php
 /**
- * Zend Framework
+ * Zend Framework (http://framework.zend.com/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://framework.zend.com/license/new-bsd
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
- *
- * @category   Zend
- * @package    Zend_Service_WindowsAzure_Storage
- * @subpackage Blob
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://todo     name_todo
- * @version    $Id: Stream.php 24594 2012-01-05 21:27:01Z matthew $
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
+ * @package   Zend_Service_WindowsAzure
  */
 
-/**
- * @see Zend_Service_WindowsAzure_Storage_Blob
- */
-require_once 'Zend/Service/WindowsAzure/Storage/Blob.php';
+namespace Zend\Service\WindowsAzure\Storage\Blob;
 
-/**
- * @see Zend_Service_WindowsAzure_Exception
- */
-require_once 'Zend/Service/WindowsAzure/Exception.php';
-
+use Zend\Service\WindowsAzure\Exception\ExceptionInterface;
+use Zend\Service\WindowsAzure\Exception\DomainException;
+use Zend\Service\WindowsAzure\Exception\RuntimeException;
 
 /**
  * @category   Zend
  * @package    Zend_Service_WindowsAzure_Storage
  * @subpackage Blob
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_WindowsAzure_Storage_Blob_Stream
+class Stream
 {
     /**
      * Current file name
@@ -64,7 +45,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
     /**
      * Blob storage client
      *
-     * @var Zend_Service_WindowsAzure_Storage_Blob
+     * @var Blob
      */
     private $_storageClient = null;
 
@@ -86,19 +67,21 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
      * Retrieve storage client for this stream type
      *
      * @param string $path
-     * @return Zend_Service_WindowsAzure_Storage_Blob
+     * @throws RuntimeException
+     * @throws DomainException
+     * @return Blob
      */
     protected function _getStorageClient($path = '')
     {
         if ($this->_storageClient === null) {
             $url = explode(':', $path);
             if (!$url) {
-                throw new Zend_Service_WindowsAzure_Exception('Could not parse path "' . $path . '".');
+                throw new DomainException('Could not parse path "' . $path . '".');
             }
 
-            $this->_storageClient = Zend_Service_WindowsAzure_Storage_Blob::getWrapperClient($url[0]);
+            $this->_storageClient = Blob::getWrapperClient($url[0]);
             if (!$this->_storageClient) {
-                throw new Zend_Service_WindowsAzure_Exception('No storage client registered for stream type "' . $url[0] . '://".');
+                throw new RuntimeException('No storage client registered for stream type "' . $url[0] . '://".');
             }
         }
 
@@ -152,7 +135,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
      */
     public function stream_open($path, $mode, $options, $opened_path)
     {
-        $this->_fileName = $path;
+        $this->_fileName          = $path;
         $this->_temporaryFileName = tempnam(sys_get_temp_dir(), 'azure');
 
         // Check the file can be opened
@@ -188,6 +171,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
     /**
      * Close the stream
      *
+     * @throws ExceptionInterface
      * @return void
      */
     public function stream_close()
@@ -213,7 +197,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
                     $this->_getFileName($this->_fileName),
                     $this->_temporaryFileName
                 );
-            } catch (Zend_Service_WindowsAzure_Exception $ex) {
+            } catch (ExceptionInterface $ex) {
                 @unlink($this->_temporaryFileName);
                 unset($this->_storageClient);
 
@@ -300,13 +284,14 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
     /**
      * Flush current cached stream data to storage
      *
+     * @throws ExceptionInterface
      * @return boolean
      */
     public function stream_flush()
     {
         $result = fflush($this->_temporaryFileHandle);
 
-         // Upload the file?
+        // Upload the file?
         if ($this->_writeMode) {
             // Make sure the container exists
             $containerExists = $this->_getStorageClient($this->_fileName)->containerExists(
@@ -325,7 +310,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
                     $this->_getFileName($this->_fileName),
                     $this->_temporaryFileName
                 );
-            } catch (Zend_Service_WindowsAzure_Exception $ex) {
+            } catch (ExceptionInterface $ex) {
                 @unlink($this->_temporaryFileName);
                 unset($this->_storageClient);
 
@@ -347,28 +332,28 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
             return false;
         }
 
-        $stat = array();
-        $stat['dev'] = 0;
-        $stat['ino'] = 0;
-        $stat['mode'] = 0;
-        $stat['nlink'] = 0;
-        $stat['uid'] = 0;
-        $stat['gid'] = 0;
-        $stat['rdev'] = 0;
-        $stat['size'] = 0;
-        $stat['atime'] = 0;
-        $stat['mtime'] = 0;
-        $stat['ctime'] = 0;
+        $stat            = array();
+        $stat['dev']     = 0;
+        $stat['ino']     = 0;
+        $stat['mode']    = 0;
+        $stat['nlink']   = 0;
+        $stat['uid']     = 0;
+        $stat['gid']     = 0;
+        $stat['rdev']    = 0;
+        $stat['size']    = 0;
+        $stat['atime']   = 0;
+        $stat['mtime']   = 0;
+        $stat['ctime']   = 0;
         $stat['blksize'] = 0;
-        $stat['blocks'] = 0;
+        $stat['blocks']  = 0;
 
         $info = null;
         try {
             $info = $this->_getStorageClient($this->_fileName)->getBlobInstance(
-                        $this->_getContainerName($this->_fileName),
-                        $this->_getFileName($this->_fileName)
-                    );
-        } catch (Zend_Service_WindowsAzure_Exception $ex) {
+                $this->_getContainerName($this->_fileName),
+                $this->_getFileName($this->_fileName)
+            );
+        } catch (ExceptionInterface $ex) {
             // Unexisting file...
         }
         if ($info !== null) {
@@ -398,12 +383,13 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
      *
      * @param  string  $path_from
      * @param  string  $path_to
+     * @throws RuntimeException
      * @return boolean False
      */
     public function rename($path_from, $path_to)
     {
         if ($this->_getContainerName($path_from) != $this->_getContainerName($path_to)) {
-            throw new Zend_Service_WindowsAzure_Exception('Container name can not be changed.');
+            throw new RuntimeException('Container name can not be changed.');
         }
 
         if ($this->_getFileName($path_from) == $this->_getContainerName($path_to)) {
@@ -426,34 +412,34 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
     /**
      * Return array of URL variables
      *
-     * @param  string $path
+     * @param  string  $path
      * @param  integer $flags
      * @return array
      */
     public function url_stat($path, $flags)
     {
-        $stat = array();
-        $stat['dev'] = 0;
-        $stat['ino'] = 0;
-        $stat['mode'] = 0;
-        $stat['nlink'] = 0;
-        $stat['uid'] = 0;
-        $stat['gid'] = 0;
-        $stat['rdev'] = 0;
-        $stat['size'] = 0;
-        $stat['atime'] = 0;
-        $stat['mtime'] = 0;
-        $stat['ctime'] = 0;
+        $stat            = array();
+        $stat['dev']     = 0;
+        $stat['ino']     = 0;
+        $stat['mode']    = 0;
+        $stat['nlink']   = 0;
+        $stat['uid']     = 0;
+        $stat['gid']     = 0;
+        $stat['rdev']    = 0;
+        $stat['size']    = 0;
+        $stat['atime']   = 0;
+        $stat['mtime']   = 0;
+        $stat['ctime']   = 0;
         $stat['blksize'] = 0;
-        $stat['blocks'] = 0;
+        $stat['blocks']  = 0;
 
         $info = null;
         try {
             $info = $this->_getStorageClient($path)->getBlobInstance(
-                        $this->_getContainerName($path),
-                        $this->_getFileName($path)
-                    );
-        } catch (Zend_Service_WindowsAzure_Exception $ex) {
+                $this->_getContainerName($path),
+                $this->_getFileName($path)
+            );
+        } catch (ExceptionInterface $ex) {
             // Unexisting file...
         }
         if ($info !== null) {
@@ -470,6 +456,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
      * @param  string  $path
      * @param  integer $mode
      * @param  integer $options
+     * @throws RuntimeException
      * @return boolean
      */
     public function mkdir($path, $mode, $options)
@@ -480,11 +467,11 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
                 $this->_getStorageClient($path)->createContainer(
                     $this->_getContainerName($path)
                 );
-            } catch (Zend_Service_WindowsAzure_Exception $ex) {
+            } catch (ExceptionInterface $ex) {
                 return false;
             }
         } else {
-            throw new Zend_Service_WindowsAzure_Exception('mkdir() with multiple levels is not supported on Windows Azure Blob Storage.');
+            throw new RuntimeException('mkdir() with multiple levels is not supported on Windows Azure Blob Storage.');
         }
     }
 
@@ -493,6 +480,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
      *
      * @param  string  $path
      * @param  integer $options
+     * @throws RuntimeException
      * @return boolean
      */
     public function rmdir($path, $options)
@@ -503,18 +491,18 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
                 $this->_getStorageClient($path)->deleteContainer(
                     $this->_getContainerName($path)
                 );
-            } catch (Zend_Service_WindowsAzure_Exception $ex) {
+            } catch (ExceptionInterface $ex) {
                 return false;
             }
         } else {
-            throw new Zend_Service_WindowsAzure_Exception('rmdir() with multiple levels is not supported on Windows Azure Blob Storage.');
+            throw new RuntimeException('rmdir() with multiple levels is not supported on Windows Azure Blob Storage.');
         }
     }
 
     /**
      * Attempt to open a directory
      *
-     * @param  string $path
+     * @param  string  $path
      * @param  integer $options
      * @return boolean
      */

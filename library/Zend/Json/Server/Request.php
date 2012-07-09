@@ -17,17 +17,20 @@
  * @subpackage Server
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Request.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
+namespace Zend\Json\Server;
+use Zend\Json;
+
 /**
+ * @todo       Revised method regex to allow NS; however, should SMD be revised to strip PHP NS instead when attaching functions?
  * @category   Zend
  * @package    Zend_Json
  * @subpackage Server
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Json_Server_Request
+class Request
 {
     /**
      * Request ID
@@ -51,7 +54,7 @@ class Zend_Json_Server_Request
      * Regex for method
      * @var string
      */
-    protected $_methodRegex = '/^[a-z][a-z0-9_.]*$/i';
+    protected $_methodRegex = '/^[a-z][a-z0-9\\\\_.]*$/i';
 
     /**
      * Request parameters
@@ -69,7 +72,7 @@ class Zend_Json_Server_Request
      * Set request state
      *
      * @param  array $options
-     * @return Zend_Json_Server_Request
+     * @return \Zend\Json\Server\Request
      */
     public function setOptions(array $options)
     {
@@ -90,7 +93,7 @@ class Zend_Json_Server_Request
      *
      * @param  mixed $value
      * @param  string $key
-     * @return Zend_Json_Server_Request
+     * @return \Zend\Json\Server\Request
      */
     public function addParam($value, $key = null)
     {
@@ -108,7 +111,7 @@ class Zend_Json_Server_Request
      * Add many params
      *
      * @param  array $params
-     * @return Zend_Json_Server_Request
+     * @return \Zend\Json\Server\Request
      */
     public function addParams(array $params)
     {
@@ -122,7 +125,7 @@ class Zend_Json_Server_Request
      * Overwrite params
      *
      * @param  array $params
-     * @return Zend_Json_Server_Request
+     * @return \Zend\Json\Server\Request
      */
     public function setParams(array $params)
     {
@@ -159,7 +162,7 @@ class Zend_Json_Server_Request
      * Set request method
      *
      * @param  string $name
-     * @return Zend_Json_Server_Request
+     * @return \Zend\Json\Server\Request
      */
     public function setMethod($name)
     {
@@ -195,7 +198,7 @@ class Zend_Json_Server_Request
      * Set request identifier
      *
      * @param  mixed $name
-     * @return Zend_Json_Server_Request
+     * @return \Zend\Json\Server\Request
      */
     public function setId($name)
     {
@@ -217,7 +220,7 @@ class Zend_Json_Server_Request
      * Set JSON-RPC version
      *
      * @param  string $version
-     * @return Zend_Json_Server_Request
+     * @return \Zend\Json\Server\Request
      */
     public function setVersion($version)
     {
@@ -247,8 +250,7 @@ class Zend_Json_Server_Request
      */
     public function loadJson($json)
     {
-        require_once 'Zend/Json.php';
-        $options = Zend_Json::decode($json);
+        $options = Json\Json::decode($json, Json\Json::TYPE_ARRAY);
         $this->setOptions($options);
     }
 
@@ -273,8 +275,7 @@ class Zend_Json_Server_Request
             $jsonArray['jsonrpc'] = '2.0';
         }
 
-        require_once 'Zend/Json.php';
-        return Zend_Json::encode($jsonArray);
+        return Json\Json::encode($jsonArray);
     }
 
     /**

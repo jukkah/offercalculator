@@ -17,13 +17,9 @@
  * @subpackage Helper
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: HtmlPage.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_View_Helper_HtmlObject
- */
-require_once 'Zend/View/Helper/HtmlObject.php';
+namespace Zend\View\Helper;
 
 /**
  * @category   Zend
@@ -32,7 +28,7 @@ require_once 'Zend/View/Helper/HtmlObject.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_HtmlPage extends Zend_View_Helper_HtmlObject
+class HtmlPage extends AbstractHtmlElement
 {
     /**
      * Default file type for html
@@ -62,7 +58,7 @@ class Zend_View_Helper_HtmlPage extends Zend_View_Helper_HtmlObject
      * @param string $content Alternative content
      * @return string
      */
-    public function htmlPage($data, array $attribs = array(), array $params = array(), $content = null)
+    public function __invoke($data, array $attribs = array(), array $params = array(), $content = null)
     {
         // Attrs
         $attribs = array_merge($this->_attribs, $attribs);
@@ -70,6 +66,7 @@ class Zend_View_Helper_HtmlPage extends Zend_View_Helper_HtmlObject
         // Params
         $params = array_merge(array('data' => $data), $params);
 
-        return $this->htmlObject($data, self::TYPE, $attribs, $params, $content);
+        $htmlObject = $this->getView()->plugin('htmlObject');
+        return $htmlObject($data, self::TYPE, $attribs, $params, $content);
     }
 }

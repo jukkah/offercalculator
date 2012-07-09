@@ -17,8 +17,9 @@
  * @subpackage Callback
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: CallbackInterface.php 24594 2012-01-05 21:27:01Z matthew $
  */
+
+namespace Zend\Feed\PubSubHubbub;
 
 /**
  * @category   Zend
@@ -27,7 +28,7 @@
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_Feed_Pubsubhubbub_CallbackInterface
+interface CallbackInterface
 {
     /**
      * Handle any callback from a Hub Server responding to a subscription or
@@ -54,7 +55,7 @@ interface Zend_Feed_Pubsubhubbub_CallbackInterface
      * Zend_Feed_Pubsubhubbub_HttpResponse which shares an unenforced interface with
      * (i.e. not inherited from) Zend_Controller_Response_Http.
      *
-     * @param Zend_Feed_Pubsubhubbub_HttpResponse|Zend_Controller_Response_Http $httpResponse
+     * @param HttpResponse|\Zend\Http\PhpEnvironment\Response $httpResponse
      */
     public function setHttpResponse($httpResponse);
 
@@ -63,7 +64,7 @@ interface Zend_Feed_Pubsubhubbub_CallbackInterface
      * Zend_Feed_Pubsubhubbub_HttpResponse which shares an unenforced interface with
      * (i.e. not inherited from) Zend_Controller_Response_Http.
      *
-     * @return Zend_Feed_Pubsubhubbub_HttpResponse|Zend_Controller_Response_Http
+     * @return HttpResponse|\Zend\Http\PhpEnvironment\Response
      */
     public function getHttpResponse();
 }

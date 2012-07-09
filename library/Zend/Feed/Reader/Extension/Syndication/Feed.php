@@ -16,15 +16,13 @@
  * @package    Zend_Feed_Reader
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Feed.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Feed_Reader_Extension_FeedAbstract
- */
-require_once 'Zend/Feed/Reader/Extension/FeedAbstract.php';
+namespace Zend\Feed\Reader\Extension\Syndication;
 
-require_once 'Zend/Date.php';
+use DateTime;
+use Zend\Feed\Reader;
+use Zend\Feed\Reader\Extension;
 
 /**
  * @category   Zend
@@ -32,12 +30,13 @@ require_once 'Zend/Date.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Feed_Reader_Extension_Syndication_Feed
-    extends Zend_Feed_Reader_Extension_FeedAbstract
+class Feed extends \Zend\Feed\Reader\Extension\AbstractFeed
 {
     /**
      * Get update period
+     *
      * @return string
+     * @throws Reader\Exception\InvalidArgumentException
      */
     public function getUpdatePeriod()
     {
@@ -57,7 +56,7 @@ class Zend_Feed_Reader_Extension_Syndication_Feed
             case 'yearly':
                 return $period;
             default:
-                throw new Zend_Feed_Exception("Feed specified invalid update period: '$period'."
+                throw new Reader\Exception\InvalidArgumentException("Feed specified invalid update period: '$period'."
                     .  " Must be one of hourly, daily, weekly or yearly"
                 );
         }
@@ -119,15 +118,14 @@ class Zend_Feed_Reader_Extension_Syndication_Feed
     /**
      * Get update base
      *
-     * @return Zend_Date|null
+     * @return DateTime|null
      */
     public function getUpdateBase()
     {
         $updateBase = $this->_getData('updateBase');
         $date = null;
         if ($updateBase) {
-            $date = new Zend_Date;
-            $date->set($updateBase, Zend_Date::W3C);
+            $date = DateTime::createFromFormat(DateTime::W3C, $updateBase);
         }
         return $date;
     }

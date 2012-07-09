@@ -16,13 +16,11 @@
  * @package    Zend_Filter
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Lzf.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @see Zend_Filter_Compress_CompressInterface
- */
-require_once 'Zend/Filter/Compress/CompressInterface.php';
+namespace Zend\Filter\Compress;
+
+use Zend\Filter\Exception;
 
 /**
  * Compression adapter for Lzf
@@ -32,16 +30,19 @@ require_once 'Zend/Filter/Compress/CompressInterface.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Filter_Compress_Lzf implements Zend_Filter_Compress_CompressInterface
+class Lzf implements CompressionAlgorithmInterface
 {
     /**
      * Class constructor
+     *
+     * @param  null $options
+     * @return void
+     * @throws Exception\ExtensionNotLoadedException if lzf extension missing
      */
-    public function __construct()
+    public function __construct($options = null)
     {
         if (!extension_loaded('lzf')) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception('This filter needs the lzf extension');
+            throw new Exception\ExtensionNotLoadedException('This filter needs the lzf extension');
         }
     }
 
@@ -50,13 +51,13 @@ class Zend_Filter_Compress_Lzf implements Zend_Filter_Compress_CompressInterface
      *
      * @param  string $content
      * @return string
+     * @throws Exception\RuntimeException if error occurs during compression
      */
     public function compress($content)
     {
         $compressed = lzf_compress($content);
         if (!$compressed) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception('Error during compression');
+            throw new Exception\RuntimeException('Error during compression');
         }
 
         return $compressed;
@@ -67,13 +68,13 @@ class Zend_Filter_Compress_Lzf implements Zend_Filter_Compress_CompressInterface
      *
      * @param  string $content
      * @return string
+     * @throws Exception\RuntimeException if error occurs during decompression
      */
     public function decompress($content)
     {
         $compressed = lzf_decompress($content);
         if (!$compressed) {
-            require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception('Error during compression');
+            throw new Exception\RuntimeException('Error during decompression');
         }
 
         return $compressed;

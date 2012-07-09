@@ -17,13 +17,11 @@
  * @subpackage Zend_InfoCard_Xml
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: XmlEnc.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * Zend_InfoCard_Xml_EncryptedData/Abstract.php
- */
-require_once 'Zend/InfoCard/Xml/EncryptedData/Abstract.php';
+namespace Zend\InfoCard\XML\EncryptedData;
+use Zend\InfoCard\XML\AbstractElement;
+use Zend\InfoCard\XML;
 
 /**
  * An XmlEnc formatted EncryptedData XML block
@@ -34,13 +32,13 @@ require_once 'Zend/InfoCard/Xml/EncryptedData/Abstract.php';
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_InfoCard_Xml_EncryptedData_XmlEnc extends Zend_InfoCard_Xml_EncryptedData_Abstract
+class XMLEnc extends AbstractEncryptedData
 {
 
     /**
      * Returns the Encrypted CipherValue block from the EncryptedData XML document
      *
-     * @throws Zend_InfoCard_Xml_Exception
+     * @throws XML\Exception\RuntimeException
      * @return string The value of the CipherValue block base64 encoded
      */
     public function getCipherValue()
@@ -49,14 +47,14 @@ class Zend_InfoCard_Xml_EncryptedData_XmlEnc extends Zend_InfoCard_Xml_Encrypted
 
         list(,$cipherdata) = $this->xpath("//enc:CipherData");
 
-        if(!($cipherdata instanceof Zend_InfoCard_Xml_Element)) {
-            throw new Zend_InfoCard_Xml_Exception("Unable to find the enc:CipherData block");
+        if(!($cipherdata instanceof AbstractElement)) {
+            throw new XML\Exception\RuntimeException("Unable to find the enc:CipherData block");
         }
-        $cipherdata->registerXPathNamespace('enc', 'http://www.w3.org/2001/04/xmlenc#');
+        $cipherdata->registerXPathNamespace('enc', 'http://www.w3.org/2001/04/xmlenc#');;
         list(,$ciphervalue) = $cipherdata->xpath("//enc:CipherValue");
 
-        if(!($ciphervalue instanceof Zend_InfoCard_Xml_Element)) {
-            throw new Zend_InfoCard_Xml_Exception("Unable to fidn the enc:CipherValue block");
+        if(!($ciphervalue instanceof AbstractElement)) {
+            throw new XML\Exception\RuntimeException("Unable to fidn the enc:CipherValue block");
         }
 
         return (string)$ciphervalue;

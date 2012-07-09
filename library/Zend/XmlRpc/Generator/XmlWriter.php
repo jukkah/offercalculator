@@ -17,18 +17,18 @@
  * @subpackage Generator
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: XmlWriter.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
-/**
- * @var Zend_XmlRpc_Generator_GeneratorAbstract
- */
-require_once 'Zend/XmlRpc/Generator/GeneratorAbstract.php';
+namespace Zend\XmlRpc\Generator;
 
 /**
  * XML generator adapter based on XMLWriter
+ *
+ * @category   Zend
+ * @package    Zend_XmlRpc
+ * @subpackage Generator
  */
-class Zend_XmlRpc_Generator_XmlWriter extends Zend_XmlRpc_Generator_GeneratorAbstract
+class XmlWriter extends AbstractGenerator
 {
     /**
      * XMLWriter instance
@@ -44,7 +44,7 @@ class Zend_XmlRpc_Generator_XmlWriter extends Zend_XmlRpc_Generator_GeneratorAbs
      */
     protected function _init()
     {
-        $this->_xmlWriter = new XMLWriter();
+        $this->_xmlWriter = new \XMLWriter();
         $this->_xmlWriter->openMemory();
         $this->_xmlWriter->startDocument('1.0', $this->_encoding);
     }
@@ -76,7 +76,7 @@ class Zend_XmlRpc_Generator_XmlWriter extends Zend_XmlRpc_Generator_GeneratorAbs
      * Close an previously opened XML element
      *
      * @param string $name
-     * @return void
+     * @return XmlWriter
      */
     protected function _closeElement($name)
     {
@@ -85,9 +85,13 @@ class Zend_XmlRpc_Generator_XmlWriter extends Zend_XmlRpc_Generator_GeneratorAbs
         return $this;
     }
 
+    /**
+     * Emit XML document
+     *
+     * @return string
+     */
     public function saveXml()
     {
-        $xml = $this->_xmlWriter->flush(false);
-        return $xml;
+        return $this->_xmlWriter->flush(false);
     }
 }
