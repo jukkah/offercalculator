@@ -1,2 +1,5 @@
 # NetBeansia varten
 nbproject/*
+
+# Zend Frameworkia varten
+.zfproject.xml
